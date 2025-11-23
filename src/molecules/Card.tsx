@@ -1,4 +1,5 @@
 import { MdOutlineModeEdit } from "react-icons/md";
+import Link from "next/link";
 
 export default function Card() {
   return (
@@ -16,7 +17,9 @@ export default function Card() {
       </div>
 
       <div className="w-fit h-fit">
-        <MdOutlineModeEdit size={16} />
+        <Link href={"/note/update"}>
+          <MdOutlineModeEdit size={16} />
+        </Link>
       </div>
     </div>
   );

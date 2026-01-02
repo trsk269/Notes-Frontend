@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Card() {
   return (
-    <div className="w-full h-auto flex flex-col border border-black rounded-lg p-2 gap-4">
+    <div className="w-full h-auto flex flex-col border border-gray-400 rounded-lg p-2 gap-4">
       <div className="flex flex-col gap-2">
         <h1 className="text-lg font-semibold ">Not sure where this is going</h1>
         <p className="text-sm">4th Jan 2050</p>

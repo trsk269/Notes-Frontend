@@ -1,9 +1,9 @@
-import AddorUpdateNote from "@/src/modules/AddorUpdateNote";
+import AddorUpdateNote from "../../../../src/components/modules/AddorUpdateNote";
 
 const page = () => {
   return (
     <div className="h-screen w-full">
-      <AddorUpdateNote mode="add" />
+      <AddorUpdateNote mode={"add"} />
     </div>
   );
 };

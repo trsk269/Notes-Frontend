@@ -1,0 +1,178 @@
+"use client";
+import React, { useState } from "react";
+import { CiMail } from "react-icons/ci";
+import { RiEyeCloseFill } from "react-icons/ri";
+import { TbLockPassword } from "react-icons/tb";
+import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa6";
+import Link from "next/link";
+
+type AuthStep = "FORM" | "MFA";
+
+const AuthSwitchContainer = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [authStep, setAuthStep] = useState<AuthStep>("FORM");
+  const [mfaToken, setMfaToken] = useState("");
+
+  const handleSubmit = () => {
+    // 1️⃣ Call login/register API here
+    // 2️⃣ If backend says MFA required → move to MFA step
+    setAuthStep("MFA");
+  };
+
+  const handleVerifyMFA = () => {
+    console.log("Verifying MFA token:", mfaToken);
+    // Call MFA verify API here
+  };
+
+  return (
+    <div className="w-full flex flex-col border border-gray-400 text-gray-400 rounded-lg">
+      <div className="w-full flex flex-col p-4">
+        {/* 🔹 Toggle only visible in FORM step */}
+        {authStep === "FORM" && (
+          <div className="w-full h-[2.5rem] p-1 rounded-full bg-gray-300">
+            <button
+              onClick={() => setIsLogin(true)}
+              className={`w-1/2 h-full font-semibold rounded-l-full text-black ${
+                isLogin ? "bg-gray-400" : "bg-gray-300"
+              }`}
+            >
+              Login
+            </button>
+            <button
+              onClick={() => setIsLogin(false)}
+              className={`w-1/2 h-full font-semibold rounded-r-full text-black ${
+                !isLogin ? "bg-gray-400" : "bg-gray-300"
+              }`}
+            >
+              Register
+            </button>
+          </div>
+        )}
+
+        {/* 🔹 FORM STEP */}
+        {authStep === "FORM" && (
+          <div className="flex flex-col gap-4 mt-4">
+            {/* Email */}
+            <div className="flex flex-col gap-2">
+              <label className="font-medium text-gray-700">Email Address</label>
+              <div className="flex border border-gray-300 rounded-md">
+                <div className="w-[10%] flex items-center justify-center">
+                  <CiMail className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Email"
+                  className="w-[90%] p-2 outline-none text-gray-400 "
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="flex flex-col gap-2">
+              <label className="font-medium text-gray-700">Password</label>
+              <div className="flex border border-gray-300 rounded-md">
+                <div className="w-[10%] flex items-center justify-center">
+                  <TbLockPassword className="text-gray-400" />
+                </div>
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-[80%] p-2 outline-none text-gray-400"
+                />
+                <div className="w-[10%] flex items-center justify-center">
+                  <RiEyeCloseFill className="text-gray-400" />
+                </div>
+              </div>
+            </div>
+
+            {/* Confirm password for register */}
+            {!isLogin && (
+              <div className="flex flex-col gap-2">
+                <label className="font-medium text-gray-700">
+                  Confirm Password
+                </label>
+                <div className="flex border border-gray-300 rounded-md">
+                  <div className="w-[10%] flex items-center justify-center">
+                    <TbLockPassword className="text-gray-400" />
+                  </div>
+                  <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    className="w-[90%] p-2 outline-none"
+                  />
+                </div>
+              </div>
+            )}
+
+            {isLogin && (
+              <Link href={"/reset-password"} className="text-sm text-gray-500">
+                forgot password?
+              </Link>
+            )}
+
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-gray-500 text-black font-semibold rounded-md p-2 mt-2"
+            >
+              {isLogin ? "Login" : "Register"}
+            </button>
+
+            {/* Social login */}
+            <div className="flex items-center gap-4 mt-4">
+              <hr className="flex-1" />
+              <span className="text-sm text-gray-500">Or login with</span>
+              <hr className="flex-1" />
+            </div>
+
+            <div className="flex gap-2">
+              <button className="w-1/2 bg-gray-500 text-black rounded-md p-2 text-sm">
+                <FcGoogle className="inline mr-2 rounded-full" />
+                Google
+              </button>
+              <button className="w-1/2 bg-gray-500 text-black rounded-md p-2 text-sm">
+                <FaFacebook className="inline mr-2 text-blue-600" />
+                Facebook
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 🔹 MFA STEP */}
+        {authStep === "MFA" && (
+          <div className="flex flex-col gap-4 mt-4">
+            <h2 className="text-lg font-semibold text-center">Verify MFA</h2>
+            <p className="text-sm text-gray-500 text-center">
+              Enter the 6-digit code from your authenticator app
+            </p>
+
+            <input
+              type="text"
+              maxLength={6}
+              value={mfaToken}
+              onChange={(e) => setMfaToken(e.target.value)}
+              placeholder="Enter MFA code"
+              className="w-full border border-gray-300 rounded-md p-3 text-center tracking-widest text-lg"
+            />
+
+            <button
+              onClick={handleVerifyMFA}
+              className="w-full bg-black text-white font-semibold rounded-md p-2"
+            >
+              Verify
+            </button>
+
+            <button
+              onClick={() => setAuthStep("FORM")}
+              className="text-sm text-gray-500 text-center"
+            >
+              Back to login
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AuthSwitchContainer;

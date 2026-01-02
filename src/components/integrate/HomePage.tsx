@@ -4,6 +4,7 @@ import Options from "../modules/Options";
 import Results from "../modules/Results";
 
 export default function HomePage() {
+  //main
   return (
     <>
       <div className="h-auto w-full min-h-screen flex flex-col gap-3 items-center justify-start p-2 overflow-y-auto bg-black">

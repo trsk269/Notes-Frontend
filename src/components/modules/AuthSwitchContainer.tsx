@@ -1,34 +1,115 @@
 "use client";
 import React, { useState } from "react";
 import { CiMail } from "react-icons/ci";
-import { RiEyeCloseFill } from "react-icons/ri";
+import { RiEyeCloseFill, RiEyeFill } from "react-icons/ri";
 import { TbLockPassword } from "react-icons/tb";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa6";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ZodError } from "zod";
+
+import {
+  loginSchema,
+  registerSchema,
+  mfaSchema,
+} from "../../validation/auth.schema";
+import { login, register, verifyMFA } from "../../services/auth.service";
+import { useAuthStore } from "../../store/auth.store";
 
 type AuthStep = "FORM" | "MFA";
 
 const AuthSwitchContainer = () => {
+  const router = useRouter();
+  const initializeAuth = useAuthStore((s) => s.initializeAuth);
+
   const [isLogin, setIsLogin] = useState(true);
   const [authStep, setAuthStep] = useState<AuthStep>("FORM");
   const [mfaToken, setMfaToken] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [mfaUserId, setMfaUserId] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    // 1️⃣ Call login/register API here
-    // 2️⃣ If backend says MFA required → move to MFA step
-    setAuthStep("MFA");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  /* ---------------- SUBMIT (LOGIN / REGISTER) ---------------- */
+  const handleSubmit = async () => {
+    setError(null);
+
+    try {
+      if (isLogin) {
+        loginSchema.parse(form);
+
+        const res = await login(form.email, form.password);
+
+        // 🚨 MFA required
+        if (res.mfaRequired) {
+          setMfaUserId(res.userId);
+          setAuthStep("MFA");
+          return;
+        }
+
+        // ✅ Direct login (no MFA)
+        localStorage.setItem("token", res.token);
+        await initializeAuth();
+        router.push("/");
+      } else {
+        registerSchema.parse(form);
+
+        await register(form.email, form.password);
+
+        // ✅ After register → switch to login
+        setIsLogin(true);
+      }
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setError(err.issues[0].message);
+      } else {
+        setError((err as any)?.message || "Something went wrong");
+      }
+    }
   };
 
-  const handleVerifyMFA = () => {
-    console.log("Verifying MFA token:", mfaToken);
-    // Call MFA verify API here
+  /* ---------------- MFA VERIFY ---------------- */
+  const handleVerifyMFA = async () => {
+    setError(null);
+
+    try {
+      if (!mfaUserId) {
+        setError("Session expired. Please login again.");
+        return;
+      }
+
+      mfaSchema.parse({ token: mfaToken });
+
+      const res = await verifyMFA(mfaUserId, mfaToken);
+
+      localStorage.setItem("token", res.token);
+
+      await initializeAuth();
+      router.push("/");
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setError(err.issues[0].message);
+      } else {
+        setError((err as any)?.message || "Invalid MFA code");
+      }
+    }
   };
 
   return (
     <div className="w-full flex flex-col border border-gray-400 text-gray-400 rounded-lg">
       <div className="w-full flex flex-col p-4">
-        {/* 🔹 Toggle only visible in FORM step */}
+        {error && (
+          <p className="text-sm text-red-500 text-center mb-2">{error}</p>
+        )}
+
+        {/* 🔹 Toggle */}
         {authStep === "FORM" && (
           <div className="w-full h-[2.5rem] p-1 rounded-full bg-gray-300">
             <button
@@ -62,8 +143,10 @@ const AuthSwitchContainer = () => {
                 </div>
                 <input
                   type="text"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="Email"
-                  className="w-[90%] p-2 outline-none text-gray-400 "
+                  className="w-[90%] p-2 outline-none text-gray-400"
                 />
               </div>
             </div>
@@ -76,17 +159,28 @@ const AuthSwitchContainer = () => {
                   <TbLockPassword className="text-gray-400" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
                   placeholder="Password"
                   className="w-[80%] p-2 outline-none text-gray-400"
                 />
-                <div className="w-[10%] flex items-center justify-center">
-                  <RiEyeCloseFill className="text-gray-400" />
+                <div
+                  className="w-[10%] flex items-center justify-center cursor-pointer"
+                  onClick={() => setShowPassword((p) => !p)}
+                >
+                  {showPassword ? (
+                    <RiEyeFill className="text-gray-400" />
+                  ) : (
+                    <RiEyeCloseFill className="text-gray-400" />
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Confirm password for register */}
+            {/* Confirm password */}
             {!isLogin && (
               <div className="flex flex-col gap-2">
                 <label className="font-medium text-gray-700">
@@ -98,6 +192,13 @@ const AuthSwitchContainer = () => {
                   </div>
                   <input
                     type="password"
+                    value={form.confirmPassword}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        confirmPassword: e.target.value,
+                      })
+                    }
                     placeholder="Confirm Password"
                     className="w-[90%] p-2 outline-none"
                   />
@@ -106,7 +207,7 @@ const AuthSwitchContainer = () => {
             )}
 
             {isLogin && (
-              <Link href={"/reset-password"} className="text-sm text-gray-500">
+              <Link href="/reset-password" className="text-sm text-gray-500">
                 forgot password?
               </Link>
             )}
@@ -118,7 +219,7 @@ const AuthSwitchContainer = () => {
               {isLogin ? "Login" : "Register"}
             </button>
 
-            {/* Social login */}
+            {/* Social login (kept intact) */}
             <div className="flex items-center gap-4 mt-4">
               <hr className="flex-1" />
               <span className="text-sm text-gray-500">Or login with</span>

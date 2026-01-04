@@ -1,23 +1,25 @@
 import { MdOutlineModeEdit } from "react-icons/md";
 import Link from "next/link";
+import { Note } from "../../types/note";
 
-export default function Card() {
+interface CardProps {
+  note: Note;
+}
+
+export default function Card({ note }: CardProps) {
   return (
     <div className="w-full h-auto flex flex-col border border-gray-400 rounded-lg p-2 gap-4">
       <div className="flex flex-col gap-2">
-        <h1 className="text-lg font-semibold ">Not sure where this is going</h1>
-        <p className="text-sm">4th Jan 2050</p>
+        <h1 className="text-lg font-semibold">{note.title}</h1>
+        <p className="text-sm">{new Date(note.createdAt).toDateString()}</p>
       </div>
 
-      <div className="">
-        <p className="text-sm">
-          Don't read the caption, its all same, you dumb dumb, did you even read
-          this though
-        </p>
+      <div>
+        <p className="text-sm line-clamp-3">{note.notes}</p>
       </div>
 
       <div className="w-fit h-fit">
-        <Link href={"/note/update"}>
+        <Link href={`/note/edit/${note._id}`}>
           <MdOutlineModeEdit size={16} />
         </Link>
       </div>

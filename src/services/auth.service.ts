@@ -21,4 +21,10 @@ export const verifyMFA = (userId: string, token: string) =>
     }),
   });
 
+export const resendOtp = (userId: string) =>
+  apiFetch("/auth/resend-otp", {
+    method: "POST",
+    body: JSON.stringify({ userId }),
+  });
+
 export const getMe = () => apiFetch("/auth/me");

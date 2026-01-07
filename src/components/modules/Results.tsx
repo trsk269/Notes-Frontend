@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Card from "../molecules/Card";
 import { getNotes } from "../../services/notes.service";
 import { Note } from "../../types/note";
@@ -7,17 +7,45 @@ import Link from "next/link";
 
 export default function Result() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [isFetchingNext, setIsFetchingNext] = useState(false);
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    getNotes()
-      .then((res) => setNotes(res.notes))
-      .finally(() => setLoading(false));
-  }, []);
+    setIsFetchingNext(true);
+
+    getNotes(page)
+      .then((res) => {
+        setNotes((prev) => [...prev, ...res.notes]);
+        setTotalPages(res.totalPages);
+      })
+      .finally(() => {
+        setIsFetchingNext(false);
+        setLoading(false);
+      });
+  }, [page]);
+
+  useEffect(() => {
+    if (!loadMoreRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isFetchingNext && page < totalPages) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { rootMargin: "200px" },
+    );
+
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [isFetchingNext, page, totalPages]);
 
   if (loading) return null;
 
-  // 🔹 EMPTY STATE
   if (notes.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -32,10 +60,15 @@ export default function Result() {
   }
 
   return (
-    <div className="w-full grid grid-cols-2 gap-1 h-auto text-gray-400 p-2">
-      {notes.map((note) => (
-        <Card key={note._id} note={note} />
-      ))}
-    </div>
+    <>
+      <div className="w-full grid grid-cols-2 gap-1 p-2">
+        {notes.map((note) => (
+          <Card key={note._id} note={note} />
+        ))}
+      </div>
+
+      {/* Scroll trigger */}
+      {page < totalPages && <div ref={loadMoreRef} className="h-6" />}
+    </>
   );
 }

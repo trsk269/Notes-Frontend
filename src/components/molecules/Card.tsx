@@ -8,7 +8,7 @@ interface CardProps {
 
 export default function Card({ note }: CardProps) {
   return (
-    <div className="w-full h-auto flex flex-col border border-gray-400 rounded-lg p-2 gap-4">
+    <div className="w-full h-auto flex flex-col border border-gray-400 rounded-lg p-2 gap-4 text-white">
       <div className="flex flex-col gap-2">
         <h1 className="text-lg font-semibold">{note.title}</h1>
         <p className="text-sm">{new Date(note.createdAt).toDateString()}</p>

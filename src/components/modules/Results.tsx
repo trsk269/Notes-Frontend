@@ -13,13 +13,24 @@ export default function Result() {
   const [isFetchingNext, setIsFetchingNext] = useState(false);
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const fetchedPagesRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
+    if (fetchedPagesRef.current.has(page)) return;
+
+    fetchedPagesRef.current.add(page);
     setIsFetchingNext(true);
 
     getNotes(page)
       .then((res) => {
-        setNotes((prev) => [...prev, ...res.notes]);
+        setNotes((prev) => {
+          const existingIds = new Set(prev.map((n) => n._id));
+          const uniqueNotes = res.notes.filter(
+            (n: Note) => !existingIds.has(n._id),
+          );
+          return [...prev, ...uniqueNotes];
+        });
+
         setTotalPages(res.totalPages);
       })
       .finally(() => {

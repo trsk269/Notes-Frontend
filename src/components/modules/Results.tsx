@@ -3,9 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import Card from "../molecules/Card";
 import { getNotes } from "../../services/notes.service";
 import { Note } from "../../types/note";
-import Link from "next/link";
 
-export default function Result() {
+interface ResultsProps {
+  onNoteClick: (note: Note) => void;
+  refreshKey: number;
+}
+
+export default function Results({ onNoteClick, refreshKey }: ResultsProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -14,6 +18,15 @@ export default function Result() {
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const fetchedPagesRef = useRef<Set<number>>(new Set());
+
+  // Reset logic when refreshKey changes
+  useEffect(() => {
+    setNotes([]);
+    setPage(1);
+    setTotalPages(1);
+    fetchedPagesRef.current = new Set();
+    setLoading(true);
+  }, [refreshKey]);
 
   useEffect(() => {
     if (fetchedPagesRef.current.has(page)) return;
@@ -37,7 +50,7 @@ export default function Result() {
         setIsFetchingNext(false);
         setLoading(false);
       });
-  }, [page]);
+  }, [page, refreshKey]);
 
   useEffect(() => {
     if (!loadMoreRef.current) return;
@@ -55,26 +68,49 @@ export default function Result() {
     return () => observer.disconnect();
   }, [isFetchingNext, page, totalPages]);
 
-  if (loading) return null;
-
-  if (notes.length === 0) {
+  if (loading && notes.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <Link
-          href="/note/add"
-          className="border border-gray-400 text-gray-400 px-4 py-2 rounded-md"
-        >
-          + Add your first note
-        </Link>
+      <div className="w-full flex flex-col gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="w-full h-40 bg-gray-100 animate-pulse rounded-3xl"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (notes.length === 0 && !loading) {
+    return (
+      <div className="w-full h-64 flex flex-col items-center justify-center gap-4 text-gray-400">
+        <div className="w-20 h-20 bg-gray-50 flex items-center justify-center rounded-full border border-gray-100">
+          <svg
+            className="w-10 h-10"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+        </div>
+        <span className="font-bold text-sm tracking-widest uppercase">
+          No notes yet
+        </span>
       </div>
     );
   }
 
   return (
     <>
-      <div className="w-full grid grid-cols-2 gap-1 p-2">
+      <div className="w-full flex flex-col gap-4">
         {notes.map((note) => (
-          <Card key={note._id} note={note} />
+          <Card key={note._id} note={note} onClick={() => onNoteClick(note)} />
         ))}
       </div>
 

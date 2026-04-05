@@ -9,8 +9,12 @@ export const deleteNote = (noteId: string) =>
   });
 
 export interface NotePayload {
-  title: string;
-  notes: string;
+  title?: string;
+  notes?: string;
+  theme?: string;
+  isPinned?: boolean;
+  isArchived?: boolean;
+  notifyAt?: string | null;
 }
 
 export const createNote = (payload: NotePayload) =>
@@ -21,7 +25,7 @@ export const createNote = (payload: NotePayload) =>
 
 export const getNoteById = (id: string) => apiFetch(`/notes/${id}`);
 
-export const updateNote = (id: string, payload: NotePayload) =>
+export const updateNote = (id: string, payload: Partial<NotePayload>) =>
   apiFetch(`/notes/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),

@@ -1,7 +1,10 @@
 import { MdAdd } from "react-icons/md";
-import Link from "next/link";
 
-const DefaultAdd = () => {
+interface DefaultAddProps {
+  onAddClick: () => void;
+}
+
+const DefaultAdd = ({ onAddClick }: DefaultAddProps) => {
   return (
     <div className="w-full flex justify-between items-end py-4 group">
       <div className="flex flex-col gap-1">
@@ -16,15 +19,15 @@ const DefaultAdd = () => {
         </div>
       </div>
 
-      <Link
-        href="/note/add"
+      <button
+        onClick={onAddClick}
         className="flex items-center justify-center w-14 h-14 bg-white hover:bg-[#6EE7B7] text-[#1F2937] hover:text-white rounded-[20px] transition-all duration-300 shadow-xl shadow-emerald-100/50 hover:shadow-[#6EE7B7]/30 border border-emerald-50 active:scale-95 group/btn"
       >
         <MdAdd
           size={30}
           className="group-hover/btn:rotate-90 transition-transform duration-500"
         />
-      </Link>
+      </button>
     </div>
   );
 };

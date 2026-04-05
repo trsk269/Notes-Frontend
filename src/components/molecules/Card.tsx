@@ -1,12 +1,12 @@
-import { MdOutlineModeEdit } from "react-icons/md";
-import Link from "next/link";
+import { MdOutlinePushPin, MdNotificationsActive } from "react-icons/md";
 import { Note } from "../../types/note";
 
 interface CardProps {
   note: Note;
+  onClick: () => void;
 }
 
-export default function Card({ note }: CardProps) {
+export default function Card({ note, onClick }: CardProps) {
   const formattedDate = new Date(note.createdAt).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -14,21 +14,29 @@ export default function Card({ note }: CardProps) {
   });
 
   return (
-    <div className="group w-full flex flex-col bg-white border border-gray-100 rounded-3xl p-6 gap-6 transition-all duration-300 hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 active:scale-[0.98]">
+    <div
+      onClick={onClick}
+      className={`group w-full flex flex-col ${note.theme || "bg-white"} border border-gray-100 rounded-[32px] p-6 gap-6 transition-all duration-300 hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 active:scale-[0.98] cursor-pointer relative overflow-hidden`}
+    >
       <div className="flex flex-col gap-3">
         <div className="flex justify-between items-start">
-          <h3 className="text-xl font-bold text-[#1F2937] leading-tight line-clamp-2">
+          <h3 className="text-xl font-bold text-[#1F2937] leading-tight line-clamp-2 pr-8">
             {note.title}
           </h3>
-          <div className="flex-shrink-0 ml-4 group-hover:scale-110 transition-transform">
-            <Link
-              href={`/note/edit/${note._id}`}
-              className="flex items-center justify-center w-10 h-10 bg-gray-50 text-gray-400 hover:text-[#7DD3FC] hover:bg-sky-50 rounded-xl transition-all"
-            >
-              <MdOutlineModeEdit size={20} />
-            </Link>
+          <div className="flex flex-col gap-2 absolute top-6 right-6">
+            {note.isPinned && (
+              <div className="bg-[#6EE7B7] text-white p-1.5 rounded-lg shadow-sm">
+                <MdOutlinePushPin size={16} />
+              </div>
+            )}
+            {note.notifyAt && (
+              <div className="bg-[#7DD3FC] text-white p-1.5 rounded-lg shadow-sm">
+                <MdNotificationsActive size={16} />
+              </div>
+            )}
           </div>
         </div>
+
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#6EE7B7]"></div>
           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
@@ -38,17 +46,18 @@ export default function Card({ note }: CardProps) {
       </div>
 
       <div className="relative">
-        <p className="text-sm text-gray-500 leading-relaxed line-clamp-4 font-medium">
+        <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 font-medium">
           {note.notes}
         </p>
-        <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white to-transparent opacity-50"></div>
       </div>
 
-      <div className="flex flex-wrap gap-2 pt-2">
-        <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[10px] font-bold rounded-full border border-gray-100 uppercase tracking-tighter">
-          #Personal
-        </span>
-      </div>
+      {note.isArchived && (
+        <div className="absolute bottom-6 right-6">
+          <span className="px-2 py-0.5 bg-gray-100 text-gray-400 text-[8px] font-bold rounded-md uppercase tracking-tighter">
+            Archived
+          </span>
+        </div>
+      )}
     </div>
   );
 }

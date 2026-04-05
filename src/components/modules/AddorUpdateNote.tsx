@@ -20,7 +20,6 @@ import { MdOutlineLabel } from "react-icons/md";
 import { IoIosHelpCircleOutline } from "react-icons/io";
 import { MdOutlinePushPin } from "react-icons/md";
 
-
 interface AddorUpdateNoteProps {
   mode: "add" | "update";
   noteId?: string;

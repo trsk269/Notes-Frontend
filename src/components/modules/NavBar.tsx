@@ -3,22 +3,35 @@ import { IoIosNotificationsOutline } from "react-icons/io";
 
 export default function NavBar() {
   return (
-    <>
-      <div className="w-full flex items-center justify-between p-2">
-        <div className="flex gap-3 items-center justify-center">
-          <div className="w-8 h-8 bg-gray-400 rounded-full"></div>
-          <h4 className="text-gray-400">
-            <span>Welcome back</span> Chad
+    <nav className="w-full flex items-center justify-between py-4 group">
+      {/* Profile Section */}
+      <div className="flex gap-4 items-center cursor-pointer group/avatar">
+        <div className="relative">
+          <div className="w-12 h-12 bg-gradient-to-tr from-[#7DD3FC] to-[#6EE7B7] rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sky-100 group-hover/avatar:scale-105 transition-transform duration-300">
+            C
+          </div>
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-4 border-white rounded-full"></div>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">
+            Welcome back
+          </span>
+          <h4 className="text-[#1F2937] font-extrabold text-lg leading-tight">
+            Chad
           </h4>
         </div>
-        <div className="flex gap-2 text-gray-400">
-          <IoSearchOutline size={24} />
-          <div className="relative">
-            <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-            <IoIosNotificationsOutline size={24} />
-          </div>
-        </div>
       </div>
-    </>
+
+      {/* Actions */}
+      <div className="flex gap-3">
+        <button className="p-3 bg-white text-gray-400 hover:text-[#7DD3FC] hover:bg-sky-50 rounded-2xl transition-all duration-300 shadow-sm border border-gray-100/50">
+          <IoSearchOutline size={22} />
+        </button>
+        <button className="p-3 bg-white text-gray-400 hover:text-[#6EE7B7] hover:bg-emerald-50 rounded-2xl transition-all duration-300 shadow-sm border border-gray-100/50 relative group/notif">
+          <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full group-hover/notif:scale-125 transition-transform"></span>
+          <IoIosNotificationsOutline size={22} />
+        </button>
+      </div>
+    </nav>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CiMail } from "react-icons/ci";
 import { RiEyeCloseFill, RiEyeFill } from "react-icons/ri";
 import { TbLockPassword } from "react-icons/tb";
@@ -13,16 +13,24 @@ import { loginSchema, registerSchema } from "../../validation/auth.schema";
 import { login, register } from "../../services/auth.service";
 import { useAuthStore } from "../../store/auth.store";
 
-// Removed MFA step temporarily
+interface AuthSwitchContainerProps {
+  initialMode?: "login" | "register";
+}
 
-const AuthSwitchContainer = () => {
+const AuthSwitchContainer: React.FC<AuthSwitchContainerProps> = ({
+  initialMode = "login",
+}) => {
   const router = useRouter();
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
 
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [error, setError] = useState<string | null>(null);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    setIsLogin(initialMode === "login");
+  }, [initialMode]);
 
   const [form, setForm] = useState({
     email: "",
@@ -30,26 +38,20 @@ const AuthSwitchContainer = () => {
     confirmPassword: "",
   });
 
-  /* ---------------- SUBMIT (LOGIN / REGISTER) ---------------- */
   const handleSubmit = async () => {
     setError(null);
+    setIsLoading(true);
 
     try {
       if (isLogin) {
         loginSchema.parse(form);
-
         const res = await login(form.email, form.password);
-
-        // ✅ Direct login (no MFA)
         localStorage.setItem("token", res.token);
         await initializeAuth();
         router.push("/");
       } else {
         registerSchema.parse(form);
-
         await register(form.email, form.password);
-
-        // ✅ After register → switch to login
         setIsLogin(true);
       }
     } catch (err) {
@@ -58,138 +60,164 @@ const AuthSwitchContainer = () => {
       } else {
         setError((err as any)?.message || "Something went wrong");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  /* ---------------- HANDLERS ---------------- */
-
   return (
-    <div className="w-full flex flex-col border border-gray-400 text-gray-400 rounded-lg">
-      <div className="w-full flex flex-col p-4">
+    <div className="w-full flex flex-col bg-white rounded-3xl p-6 transition-all duration-500 ease-in-out">
+      {/* Header Info */}
+      <div className="mb-6 text-center">
+        <h3 className="text-xl font-bold text-gray-800">
+          {isLogin ? "Login to account" : "Create new account"}
+        </h3>
+      </div>
+
+      <div className="w-full flex flex-col">
         {error && (
-          <p className="text-sm text-red-500 text-center mb-2">{error}</p>
+          <div className="bg-red-50 text-red-500 text-xs font-medium px-4 py-2 rounded-lg mb-4 text-center border border-red-100 animate-shake">
+            {error}
+          </div>
         )}
 
-        {/* 🔹 Toggle */}
-        <div className="w-full h-[2.5rem] p-1 rounded-full bg-gray-300">
+        {/* Toggle with premium styling */}
+        <div className="w-full h-12 p-1 rounded-2xl bg-gray-100 flex items-center mb-8 relative">
+          <div
+            className={`absolute h-10 w-[calc(50%-4px)] bg-white rounded-xl shadow-sm transition-transform duration-300 ease-out z-0 ${
+              isLogin ? "translate-x-0" : "translate-x-full ml-1"
+            }`}
+          />
           <button
             onClick={() => setIsLogin(true)}
-            className={`w-1/2 h-full font-semibold rounded-l-full text-black ${
-              isLogin ? "bg-gray-400" : "bg-gray-300"
+            className={`flex-1 h-full z-10 font-bold text-sm transition-colors duration-300 ${
+              isLogin ? "text-gray-800" : "text-gray-400"
             }`}
           >
             Login
           </button>
           <button
             onClick={() => setIsLogin(false)}
-            className={`w-1/2 h-full font-semibold rounded-r-full text-black ${
-              !isLogin ? "bg-gray-400" : "bg-gray-300"
+            className={`flex-1 h-full z-10 font-bold text-sm transition-colors duration-300 ${
+              !isLogin ? "text-gray-800" : "text-gray-400"
             }`}
           >
             Register
           </button>
         </div>
 
-        {/* 🔹 FORM STEP */}
-        <div className="flex flex-col gap-4 mt-4">
-          {/* Email */}
-          <div className="flex flex-col gap-2">
-            <label className="font-medium text-gray-700">Email Address</label>
-            <div className="flex border border-gray-300 rounded-md">
-              <div className="w-[10%] flex items-center justify-center">
-                <CiMail className="text-gray-400" />
+        {/* Inputs */}
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-bold text-gray-700 ml-1">
+              Email Address
+            </label>
+            <div className="flex items-center bg-gray-50 border border-gray-100 rounded-2xl focus-within:ring-2 focus-within:ring-[#7DD3FC]/20 focus-within:border-[#7DD3FC]/50 transition-all">
+              <div className="pl-4 pr-3 text-gray-400">
+                <CiMail size={20} />
               </div>
               <input
-                type="text"
+                type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="Email"
-                className="w-[90%] p-2 outline-none text-gray-400"
+                placeholder="email@example.com"
+                className="w-full py-4 pr-4 bg-transparent outline-none text-gray-700 font-medium placeholder:text-gray-300"
               />
             </div>
           </div>
 
-          {/* Password */}
-          <div className="flex flex-col gap-2">
-            <label className="font-medium text-gray-700">Password</label>
-            <div className="flex border border-gray-300 rounded-md">
-              <div className="w-[10%] flex items-center justify-center">
-                <TbLockPassword className="text-gray-400" />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-bold text-gray-700 ml-1">
+              Password
+            </label>
+            <div className="flex items-center bg-gray-50 border border-gray-100 rounded-2xl focus-within:ring-2 focus-within:ring-[#7DD3FC]/20 focus-within:border-[#7DD3FC]/50 transition-all">
+              <div className="pl-4 pr-3 text-gray-400">
+                <TbLockPassword size={20} />
               </div>
               <input
                 type={showPassword ? "text" : "password"}
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="Password"
-                className="w-[80%] p-2 outline-none text-gray-400"
+                placeholder="••••••••"
+                className="w-full py-4 bg-transparent outline-none text-gray-700 font-medium placeholder:text-gray-300"
               />
-              <div
-                className="w-[10%] flex items-center justify-center cursor-pointer"
+              <button
+                className="px-4 text-gray-300 hover:text-gray-500 transition-colors"
                 onClick={() => setShowPassword((p) => !p)}
               >
                 {showPassword ? (
-                  <RiEyeFill className="text-gray-400" />
+                  <RiEyeFill size={18} />
                 ) : (
-                  <RiEyeCloseFill className="text-gray-400" />
+                  <RiEyeCloseFill size={18} />
                 )}
-              </div>
+              </button>
             </div>
           </div>
 
-          {/* Confirm password */}
           {!isLogin && (
-            <div className="flex flex-col gap-2">
-              <label className="font-medium text-gray-700">
+            <div className="flex flex-col gap-1.5 animate-in slide-in-from-top-2 duration-300">
+              <label className="text-sm font-bold text-gray-700 ml-1">
                 Confirm Password
               </label>
-              <div className="flex border border-gray-300 rounded-md">
-                <div className="w-[10%] flex items-center justify-center">
-                  <TbLockPassword className="text-gray-400" />
+              <div className="flex items-center bg-gray-50 border border-gray-100 rounded-2xl focus-within:ring-2 focus-within:ring-[#6EE7B7]/20 focus-within:border-[#6EE7B7]/50 transition-all">
+                <div className="pl-4 pr-3 text-gray-400">
+                  <TbLockPassword size={20} />
                 </div>
                 <input
                   type="password"
                   value={form.confirmPassword}
                   onChange={(e) =>
-                    setForm({
-                      ...form,
-                      confirmPassword: e.target.value,
-                    })
+                    setForm({ ...form, confirmPassword: e.target.value })
                   }
-                  placeholder="Confirm Password"
-                  className="w-[90%] p-2 outline-none"
+                  placeholder="••••••••"
+                  className="w-full py-4 pr-4 bg-transparent outline-none text-gray-700 font-medium placeholder:text-gray-300"
                 />
               </div>
             </div>
           )}
 
           {isLogin && (
-            <Link href="/reset-password" className="text-sm text-gray-500">
-              forgot password?
-            </Link>
+            <div className="flex justify-end">
+              <Link
+                href="/reset-password"
+                className="text-xs font-bold text-[#7DD3FC] hover:text-[#38BDF8] transition-colors"
+              >
+                Forgot Password?
+              </Link>
+            </div>
           )}
 
           <button
             onClick={handleSubmit}
-            className="w-full bg-gray-500 text-black font-semibold rounded-md p-2 mt-2"
+            disabled={isLoading}
+            className={`w-full py-4 mt-2 rounded-2xl text-white font-bold text-lg shadow-lg transition-all active:scale-95 flex items-center justify-center ${
+              isLogin
+                ? "bg-[#7DD3FC] hover:shadow-[#7DD3FC]/30"
+                : "bg-[#6EE7B7] hover:shadow-[#6EE7B7]/30"
+            } ${isLoading ? "opacity-70 cursor-not-allowed" : ""}`}
           >
-            {isLogin ? "Login" : "Register"}
+            {isLoading ? (
+              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : isLogin ? (
+              "Login Now"
+            ) : (
+              "Register Now"
+            )}
           </button>
 
-          {/* Social login (kept intact) */}
-          <div className="flex items-center gap-4 mt-4">
-            <hr className="flex-1" />
-            <span className="text-sm text-gray-500">Or login with</span>
-            <hr className="flex-1" />
+          {/* Social login */}
+          <div className="flex items-center gap-4 my-4 opacity-50">
+            <hr className="flex-1 border-gray-100" />
+            <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400">
+              Or continue with
+            </span>
+            <hr className="flex-1 border-gray-100" />
           </div>
 
-          <div className="flex gap-2">
-            <button className="w-1/2 bg-gray-500 text-black rounded-md p-2 text-sm">
-              <FcGoogle className="inline mr-2 rounded-full" />
-              Google
-            </button>
-            <button className="w-1/2 bg-gray-500 text-black rounded-md p-2 text-sm">
-              <FaFacebook className="inline mr-2 text-blue-600" />
-              Facebook
+          <div className="flex gap-3">
+            <button className="flex-1 flex items-center justify-center gap-2 py-4 bg-gray-50 border border-gray-100 rounded-2xl hover:bg-gray-100 transition-all active:scale-95">
+              <FcGoogle size={22} />
+              <span className="text-sm font-bold text-gray-700">Google</span>
             </button>
           </div>
         </div>

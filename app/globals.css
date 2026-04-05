@@ -1,1 +1,101 @@
 @import "tailwindcss";
+
+@layer utilities {
+  .animate-in {
+    animation-delay: 0s;
+    animation-duration: 0.5s;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .fade-in {
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    animation-name: fade-in;
+  }
+
+  .slide-in-from-right {
+    @keyframes slide-in-from-right {
+      from {
+        transform: translateX(100%);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+    animation-name: slide-in-from-right;
+  }
+
+  .slide-in-from-bottom {
+    @keyframes slide-in-from-bottom {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+    animation-name: slide-in-from-bottom;
+  }
+
+  .slide-in-from-left {
+    @keyframes slide-in-from-left {
+      from {
+        transform: translateX(-100%);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+    animation-name: slide-in-from-left;
+  }
+
+  .slide-in-from-top-2 {
+    @keyframes slide-in-from-top-2 {
+      from {
+        transform: translateY(-0.5rem);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    animation-name: slide-in-from-top-2;
+  }
+
+  .animate-bounce-slow {
+    @keyframes bounce-slow {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+    animation: bounce-slow 3s infinite ease-in-out;
+  }
+
+  .animate-shake {
+    @keyframes shake {
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-5px);
+      }
+      75% {
+        transform: translateX(5px);
+      }
+    }
+    animation: shake 0.4s ease-in-out;
+  }
+}

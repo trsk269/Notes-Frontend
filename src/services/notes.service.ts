@@ -1,7 +1,12 @@
 import { apiFetch } from "./api";
 
-export const getNotes = (page = 1, limit = 20) =>
-  apiFetch(`/notes?page=${page}&limit=${limit}`);
+export const getNotes = (page = 1, limit = 20, search = "") => {
+  let url = `/notes?page=${page}&limit=${limit}`;
+  if (search) {
+    url += `&search=${encodeURIComponent(search)}`;
+  }
+  return apiFetch(url);
+};
 
 export const deleteNote = (noteId: string) =>
   apiFetch(`/notes/${noteId}`, {

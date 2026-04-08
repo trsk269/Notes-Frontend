@@ -7,9 +7,14 @@ import { Note } from "../../types/note";
 interface ResultsProps {
   onNoteClick: (note: Note) => void;
   refreshKey: number;
+  search?: string;
 }
 
-export default function Results({ onNoteClick, refreshKey }: ResultsProps) {
+export default function Results({
+  onNoteClick,
+  refreshKey,
+  search = "",
+}: ResultsProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -19,14 +24,14 @@ export default function Results({ onNoteClick, refreshKey }: ResultsProps) {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const fetchedPagesRef = useRef<Set<number>>(new Set());
 
-  // Reset logic when refreshKey changes
+  // Reset logic when refreshKey or search changes
   useEffect(() => {
     setNotes([]);
     setPage(1);
     setTotalPages(1);
     fetchedPagesRef.current = new Set();
     setLoading(true);
-  }, [refreshKey]);
+  }, [refreshKey, search]);
 
   useEffect(() => {
     if (fetchedPagesRef.current.has(page)) return;
@@ -34,7 +39,7 @@ export default function Results({ onNoteClick, refreshKey }: ResultsProps) {
     fetchedPagesRef.current.add(page);
     setIsFetchingNext(true);
 
-    getNotes(page)
+    getNotes(page, 20, search)
       .then((res) => {
         setNotes((prev) => {
           const existingIds = new Set(prev.map((n) => n._id));
@@ -50,7 +55,7 @@ export default function Results({ onNoteClick, refreshKey }: ResultsProps) {
         setIsFetchingNext(false);
         setLoading(false);
       });
-  }, [page, refreshKey]);
+  }, [page, refreshKey, search]);
 
   useEffect(() => {
     if (!loadMoreRef.current) return;

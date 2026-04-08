@@ -1,3 +1,4 @@
+import React from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import { IoIosNotificationsOutline } from "react-icons/io";
 import { useAuthStore } from "../../store/auth.store";
@@ -9,6 +10,10 @@ export default function NavBar() {
 
   const handleProfileClick = () => {
     router.push("/profile");
+  };
+
+  const handleSearchClick = () => {
+    router.push("/search");
   };
 
   const displayName = user?.name || user?.username || "User";
@@ -47,7 +52,10 @@ export default function NavBar() {
 
       {/* Actions */}
       <div className="flex gap-3">
-        <button className="p-3 bg-white text-gray-400 hover:text-[#7DD3FC] hover:bg-sky-50 rounded-2xl transition-all duration-300 shadow-sm border border-gray-100/50">
+        <button
+          onClick={handleSearchClick}
+          className="p-3 bg-white text-gray-400 hover:text-[#7DD3FC] hover:bg-sky-50 rounded-2xl transition-all duration-300 shadow-sm border border-gray-100/50"
+        >
           <IoSearchOutline size={22} />
         </button>
         <button className="p-3 bg-white text-gray-400 hover:text-[#6EE7B7] hover:bg-emerald-50 rounded-2xl transition-all duration-300 shadow-sm border border-gray-100/50 relative group/notif">

@@ -24,23 +24,31 @@ import {
   createNote,
   updateNote,
   deleteNote,
+  getNoteById,
 } from "../../services/notes.service";
+import { useRouter } from "next/navigation";
 
 interface AddorUpdateNoteProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
   note?: Note | null;
-  onSave: () => void;
+  onSave?: () => void;
+  mode?: "add" | "update";
+  noteId?: string;
 }
 
 type ActiveTab = "add" | "color" | "menu" | "reminder" | null;
 
 const AddorUpdateNote = ({
-  isOpen,
+  isOpen = true,
   onClose,
-  note,
+  note: initialNote,
   onSave,
+  mode,
+  noteId,
 }: AddorUpdateNoteProps) => {
+  const router = useRouter();
+  const [note, setNote] = useState<Note | null>(initialNote || null);
   const [form, setForm] = useState({
     title: "",
     notes: "",
@@ -56,6 +64,23 @@ const AddorUpdateNote = ({
   const [toast, setToast] = useState<string | null>(null);
 
   const backdropRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (noteId && !initialNote) {
+      const fetchNote = async () => {
+        try {
+          setLoading(true);
+          const response = await getNoteById(noteId);
+          setNote(response.data);
+        } catch (err) {
+          setError("Failed to fetch note");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchNote();
+    }
+  }, [noteId, initialNote]);
 
   useEffect(() => {
     if (note) {
@@ -104,8 +129,18 @@ const AddorUpdateNote = ({
       } else {
         await createNote(form);
       }
-      onSave();
-      onClose();
+
+      if (onSave) {
+        onSave();
+      } else {
+        router.push("/");
+      }
+
+      if (onClose) {
+        onClose();
+      } else {
+        router.back();
+      }
     } catch (err) {
       setError("Something went wrong while saving");
     } finally {
@@ -118,8 +153,17 @@ const AddorUpdateNote = ({
     try {
       setLoading(true);
       await deleteNote(note._id);
-      onSave();
-      onClose();
+      if (onSave) {
+        onSave();
+      } else {
+        router.push("/");
+      }
+
+      if (onClose) {
+        onClose();
+      } else {
+        router.back();
+      }
     } catch (err) {
       setError("Failed to delete note");
     } finally {
@@ -179,7 +223,13 @@ const AddorUpdateNote = ({
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-300"
       ref={backdropRef}
       onClick={(e) => {
-        if (e.target === backdropRef.current) onClose();
+        if (e.target === backdropRef.current) {
+          if (onClose) {
+            onClose();
+          } else {
+            router.back();
+          }
+        }
       }}
     >
       <div
@@ -195,7 +245,13 @@ const AddorUpdateNote = ({
         {/* Header */}
         <div className="w-full flex items-center justify-between p-6">
           <button
-            onClick={onClose}
+            onClick={() => {
+              if (onClose) {
+                onClose();
+              } else {
+                router.back();
+              }
+            }}
             className="w-10 h-10 flex items-center justify-center rounded-2xl bg-gray-50/50 text-[#1F2937] hover:bg-gray-100/50 transition-all border border-gray-100/20"
           >
             <IoMdArrowBack size={20} />

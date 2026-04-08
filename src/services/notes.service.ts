@@ -1,9 +1,12 @@
 import { apiFetch } from "./api";
 
-export const getNotes = (page = 1, limit = 20, search = "") => {
+export const getNotes = (page = 1, limit = 20, search = "", filter = "") => {
   let url = `/notes?page=${page}&limit=${limit}`;
   if (search) {
     url += `&search=${encodeURIComponent(search)}`;
+  }
+  if (filter) {
+    url += `&filter=${encodeURIComponent(filter)}`;
   }
   return apiFetch(url);
 };

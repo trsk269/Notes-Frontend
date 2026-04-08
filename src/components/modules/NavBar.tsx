@@ -16,6 +16,10 @@ export default function NavBar() {
     router.push("/search");
   };
 
+  const handleNotificationClick = () => {
+    router.push("/notifications");
+  };
+
   const displayName = user?.name || user?.username || "User";
   const initial = displayName.charAt(0).toUpperCase();
 
@@ -58,7 +62,10 @@ export default function NavBar() {
         >
           <IoSearchOutline size={22} />
         </button>
-        <button className="p-3 bg-white text-gray-400 hover:text-[#6EE7B7] hover:bg-emerald-50 rounded-2xl transition-all duration-300 shadow-sm border border-gray-100/50 relative group/notif">
+        <button
+          onClick={handleNotificationClick}
+          className="p-3 bg-white text-gray-400 hover:text-[#6EE7B7] hover:bg-emerald-50 rounded-2xl transition-all duration-300 shadow-sm border border-gray-100/50 relative group/notif"
+        >
           <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full group-hover/notif:scale-125 transition-transform"></span>
           <IoIosNotificationsOutline size={22} />
         </button>

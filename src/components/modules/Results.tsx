@@ -8,12 +8,14 @@ interface ResultsProps {
   onNoteClick: (note: Note) => void;
   refreshKey: number;
   search?: string;
+  filter?: string;
 }
 
 export default function Results({
   onNoteClick,
   refreshKey,
   search = "",
+  filter = "",
 }: ResultsProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [page, setPage] = useState(1);
@@ -24,14 +26,14 @@ export default function Results({
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const fetchedPagesRef = useRef<Set<number>>(new Set());
 
-  // Reset logic when refreshKey or search changes
+  // Reset logic when refreshKey, search or filter changes
   useEffect(() => {
     setNotes([]);
     setPage(1);
     setTotalPages(1);
     fetchedPagesRef.current = new Set();
     setLoading(true);
-  }, [refreshKey, search]);
+  }, [refreshKey, search, filter]);
 
   useEffect(() => {
     if (fetchedPagesRef.current.has(page)) return;
@@ -39,7 +41,7 @@ export default function Results({
     fetchedPagesRef.current.add(page);
     setIsFetchingNext(true);
 
-    getNotes(page, 20, search)
+    getNotes(page, 20, search, filter)
       .then((res) => {
         setNotes((prev) => {
           const existingIds = new Set(prev.map((n) => n._id));
@@ -55,7 +57,7 @@ export default function Results({
         setIsFetchingNext(false);
         setLoading(false);
       });
-  }, [page, refreshKey, search]);
+  }, [page, refreshKey, search, filter]);
 
   useEffect(() => {
     if (!loadMoreRef.current) return;

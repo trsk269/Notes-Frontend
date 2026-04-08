@@ -8,4 +8,5 @@ export interface Note {
   notifyAt?: string | null;
   createdAt: string;
   updatedAt: string;
+  tags?: { _id: string; name: string }[];
 }

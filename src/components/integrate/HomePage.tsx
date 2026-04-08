@@ -10,6 +10,7 @@ import { Note } from "../../types/note";
 export default function HomePage() {
   const router = useRouter();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedTagId, setSelectedTagId] = useState("");
 
   const openAddNote = () => {
     router.push("/note/add");
@@ -31,11 +32,18 @@ export default function HomePage() {
 
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
           <DefaultAdd onAddClick={openAddNote} />
-          <Options />
+          <Options
+            onSelectTag={setSelectedTagId}
+            selectedTagId={selectedTagId}
+          />
         </div>
 
         <div className="mt-2 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <Results onNoteClick={openEditNote} refreshKey={refreshKey} />
+          <Results
+            onNoteClick={openEditNote}
+            refreshKey={refreshKey}
+            tagId={selectedTagId}
+          />
         </div>
       </div>
     </main>

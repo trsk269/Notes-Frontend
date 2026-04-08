@@ -9,6 +9,7 @@ interface ResultsProps {
   refreshKey: number;
   search?: string;
   filter?: string;
+  tagId?: string;
 }
 
 export default function Results({
@@ -16,6 +17,7 @@ export default function Results({
   refreshKey,
   search = "",
   filter = "",
+  tagId = "",
 }: ResultsProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [page, setPage] = useState(1);
@@ -26,14 +28,14 @@ export default function Results({
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const fetchedPagesRef = useRef<Set<number>>(new Set());
 
-  // Reset logic when refreshKey, search or filter changes
+  // Reset logic when refreshKey, search, filter or tagId changes
   useEffect(() => {
     setNotes([]);
     setPage(1);
     setTotalPages(1);
     fetchedPagesRef.current = new Set();
     setLoading(true);
-  }, [refreshKey, search, filter]);
+  }, [refreshKey, search, filter, tagId]);
 
   useEffect(() => {
     if (fetchedPagesRef.current.has(page)) return;
@@ -41,7 +43,7 @@ export default function Results({
     fetchedPagesRef.current.add(page);
     setIsFetchingNext(true);
 
-    getNotes(page, 20, search, filter)
+    getNotes(page, 20, search, filter, tagId)
       .then((res) => {
         setNotes((prev) => {
           const existingIds = new Set(prev.map((n) => n._id));
@@ -57,7 +59,7 @@ export default function Results({
         setIsFetchingNext(false);
         setLoading(false);
       });
-  }, [page, refreshKey, search, filter]);
+  }, [page, refreshKey, search, filter, tagId]);
 
   useEffect(() => {
     if (!loadMoreRef.current) return;

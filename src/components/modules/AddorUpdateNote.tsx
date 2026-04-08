@@ -27,6 +27,8 @@ import {
   getNoteById,
 } from "../../services/notes.service";
 import { useRouter } from "next/navigation";
+import { getTags, createTag } from "../../services/tags.service";
+import { IoCloseOutline } from "react-icons/io5";
 
 interface AddorUpdateNoteProps {
   isOpen?: boolean;
@@ -38,7 +40,7 @@ interface AddorUpdateNoteProps {
   isPage?: boolean;
 }
 
-type ActiveTab = "add" | "color" | "menu" | "reminder" | null;
+type ActiveTab = "add" | "color" | "menu" | "reminder" | "tags" | null;
 
 const AddorUpdateNote = ({
   isOpen = true,
@@ -58,16 +60,29 @@ const AddorUpdateNote = ({
     isPinned: false,
     isArchived: false,
     notifyAt: null as string | null,
+    tags: [] as { _id: string; name: string }[],
   });
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [allTags, setAllTags] = useState<{ _id: string; name: string }[]>([]);
+  const [newTagName, setNewTagName] = useState("");
 
   const backdropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const fetchAllTags = async () => {
+      try {
+        const res = await getTags();
+        if (res.tags) setAllTags(res.tags);
+      } catch (err) {
+        console.error("Failed to fetch tags");
+      }
+    };
+    fetchAllTags();
+
     if (noteId && !initialNote) {
       const fetchNote = async () => {
         try {
@@ -93,6 +108,7 @@ const AddorUpdateNote = ({
         isPinned: note.isPinned,
         isArchived: note.isArchived,
         notifyAt: note.notifyAt || null,
+        tags: note.tags || [],
       });
     } else {
       setForm({
@@ -102,6 +118,7 @@ const AddorUpdateNote = ({
         isPinned: false,
         isArchived: false,
         notifyAt: null,
+        tags: [],
       });
     }
     setActiveTab(null);
@@ -126,10 +143,15 @@ const AddorUpdateNote = ({
     setError(null);
     try {
       setLoading(true);
+      const payload = {
+        ...form,
+        tags: form.tags.map((t) => t._id),
+      };
+
       if (note) {
-        await updateNote(note._id, form);
+        await updateNote(note._id, payload);
       } else {
-        await createNote(form);
+        await createNote(payload);
       }
 
       if (onSave) {
@@ -206,7 +228,7 @@ const AddorUpdateNote = ({
     { icon: MdOutlineContentCopy, label: "Make a Copy" },
     { icon: IoShareSocialOutline, label: "Send" },
     { icon: IoPersonAddOutline, label: "Collaborator" },
-    { icon: MdOutlineLabel, label: "Labels" },
+    { icon: MdOutlineLabel, label: "Labels", onClick: () => toggleTab("tags") },
     { icon: IoIosHelpCircleOutline, label: "Help and Contact" },
   ];
 
@@ -318,6 +340,30 @@ const AddorUpdateNote = ({
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             className={`w-full bg-transparent outline-none ${getTextColor(form.theme)} text-xl font-semibold leading-relaxed ${getPlaceholderColor(form.theme)} resize-none min-h-[400px] transition-colors duration-300`}
           />
+
+          {/* Tag Chips */}
+          {form.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {form.tags.map((tag) => (
+                <div
+                  key={tag._id}
+                  className="flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-xs font-bold text-[#1F2937]"
+                >
+                  #{tag.name}
+                  <button
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        tags: form.tags.filter((t) => t._id !== tag._id),
+                      })
+                    }
+                  >
+                    <IoCloseOutline size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Premium Dock Toolbar */}
@@ -402,6 +448,81 @@ const AddorUpdateNote = ({
                       }
                       className="w-full bg-white/10 text-white border border-white/20 rounded-xl p-3 outline-none focus:border-white/40 transition-all font-bold"
                     />
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "tags" && (
+                <div className="flex flex-col gap-4">
+                  <span className="text-white/60 text-[10px] font-black uppercase tracking-widest px-2">
+                    Manage Tags
+                  </span>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Add new tag..."
+                        value={newTagName}
+                        onChange={(e) => setNewTagName(e.target.value)}
+                        className="flex-1 bg-white/10 text-white border border-white/20 rounded-xl p-3 outline-none focus:border-white/40 text-sm font-bold"
+                      />
+                      <button
+                        onClick={async () => {
+                          if (!newTagName.trim()) return;
+                          try {
+                            const res = await createTag(newTagName);
+                            if (res.tag) {
+                              setAllTags([...allTags, res.tag]);
+                              if (
+                                !form.tags.find((t) => t._id === res.tag._id)
+                              ) {
+                                setForm({
+                                  ...form,
+                                  tags: [...form.tags, res.tag],
+                                });
+                              }
+                              setNewTagName("");
+                            }
+                          } catch (err) {
+                            showToast("Failed to create tag");
+                          }
+                        }}
+                        className="bg-[#6EE7B7] text-[#1F2937] px-4 rounded-xl font-bold text-xs"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto no-scrollbar py-2">
+                      {allTags.map((tag) => {
+                        const isSelected = form.tags.some(
+                          (t) => t._id === tag._id,
+                        );
+                        return (
+                          <button
+                            key={tag._id}
+                            onClick={() => {
+                              if (isSelected) {
+                                setForm({
+                                  ...form,
+                                  tags: form.tags.filter(
+                                    (t) => t._id !== tag._id,
+                                  ),
+                                });
+                              } else {
+                                setForm({ ...form, tags: [...form.tags, tag] });
+                              }
+                            }}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                              isSelected
+                                ? "bg-[#7DD3FC] text-white border-[#7DD3FC]"
+                                : "bg-white/10 text-white/60 border-white/10 hover:border-white/40"
+                            }`}
+                          >
+                            #{tag.name}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}

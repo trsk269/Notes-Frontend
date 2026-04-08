@@ -8,6 +8,7 @@ import {
   IoCameraOutline,
   IoTrashOutline,
   IoCheckmarkCircleOutline,
+  IoArchiveOutline,
 } from "react-icons/io5";
 
 export default function ProfilePage() {
@@ -193,6 +194,34 @@ export default function ProfilePage() {
             className="mt-4 p-4 bg-gradient-to-r from-[#7DD3FC] to-[#6EE7B7] text-white font-black text-lg rounded-[1.8rem] shadow-xl shadow-sky-100 hover:shadow-2xl hover:shadow-sky-200 hover:scale-[1.02] active:scale-95 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isLoading ? "Saving Changes..." : "Save Changes"}
+          </button>
+        </div>
+
+        {/* Notes Management */}
+        <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+          <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-1">
+            Notes Management
+          </label>
+          <button
+            onClick={() => router.push("/archive")}
+            className="w-full p-6 bg-white border border-gray-100 rounded-[2rem] flex items-center justify-between group hover:border-[#7DD3FC] transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-sky-100/20"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-sky-50 text-[#7DD3FC] rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <IoArchiveOutline size={24} />
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-bold text-[#1F2937]">
+                  Archived Notes
+                </h3>
+                <p className="text-sm text-gray-400 font-medium">
+                  View and restore hidden notes
+                </p>
+              </div>
+            </div>
+            <div className="w-10 h-10 flex items-center justify-center text-gray-300 group-hover:text-[#7DD3FC] transition-colors">
+              <IoArrowBack size={20} className="rotate-180" />
+            </div>
           </button>
         </div>
 

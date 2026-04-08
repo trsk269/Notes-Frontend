@@ -1,15 +1,38 @@
 import { IoSearchOutline } from "react-icons/io5";
 import { IoIosNotificationsOutline } from "react-icons/io";
+import { useAuthStore } from "../../store/auth.store";
+import { useRouter } from "next/navigation";
 
 export default function NavBar() {
+  const { user } = useAuthStore();
+  const router = useRouter();
+
+  const handleProfileClick = () => {
+    router.push("/profile");
+  };
+
+  const displayName = user?.name || user?.username || "User";
+  const initial = displayName.charAt(0).toUpperCase();
+
   return (
     <nav className="w-full flex items-center justify-between py-4 group">
       {/* Profile Section */}
-      <div className="flex gap-4 items-center cursor-pointer group/avatar">
+      <div
+        onClick={handleProfileClick}
+        className="flex gap-4 items-center cursor-pointer group/avatar"
+      >
         <div className="relative">
-          <div className="w-12 h-12 bg-gradient-to-tr from-[#7DD3FC] to-[#6EE7B7] rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sky-100 group-hover/avatar:scale-105 transition-transform duration-300">
-            C
-          </div>
+          {user?.profilePic ? (
+            <img
+              src={user.profilePic}
+              alt={displayName}
+              className="w-12 h-12 rounded-2xl object-cover shadow-lg shadow-sky-100 group-hover/avatar:scale-105 transition-transform duration-300 border-2 border-white"
+            />
+          ) : (
+            <div className="w-12 h-12 bg-gradient-to-tr from-[#7DD3FC] to-[#6EE7B7] rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sky-100 group-hover/avatar:scale-105 transition-transform duration-300">
+              {initial}
+            </div>
+          )}
           <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-4 border-white rounded-full"></div>
         </div>
         <div className="flex flex-col">
@@ -17,7 +40,7 @@ export default function NavBar() {
             Welcome back
           </span>
           <h4 className="text-[#1F2937] font-extrabold text-lg leading-tight">
-            Chad
+            {user?.name || user?.username || "Friend"}
           </h4>
         </div>
       </div>

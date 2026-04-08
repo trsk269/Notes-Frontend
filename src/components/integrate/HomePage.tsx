@@ -1,25 +1,22 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import NavBar from "../modules/NavBar";
 import DefaultAdd from "../modules/DefaultAdd";
 import Options from "../modules/Options";
 import Results from "../modules/Results";
-import AddorUpdateNote from "../modules/AddorUpdateNote";
 import { Note } from "../../types/note";
 
 export default function HomePage() {
-  const [isNoteOpen, setIsNoteOpen] = useState(false);
-  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const router = useRouter();
   const [refreshKey, setRefreshKey] = useState(0);
 
   const openAddNote = () => {
-    setEditingNote(null);
-    setIsNoteOpen(true);
+    router.push("/note/add");
   };
 
   const openEditNote = (note: Note) => {
-    setEditingNote(note);
-    setIsNoteOpen(true);
+    router.push(`/note/edit/${note._id}`);
   };
 
   const handleRefresh = () => {
@@ -41,13 +38,6 @@ export default function HomePage() {
           <Results onNoteClick={openEditNote} refreshKey={refreshKey} />
         </div>
       </div>
-
-      <AddorUpdateNote
-        isOpen={isNoteOpen}
-        onClose={() => setIsNoteOpen(false)}
-        note={editingNote}
-        onSave={handleRefresh}
-      />
     </main>
   );
 }

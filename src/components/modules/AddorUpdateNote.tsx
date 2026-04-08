@@ -35,6 +35,7 @@ interface AddorUpdateNoteProps {
   onSave?: () => void;
   mode?: "add" | "update";
   noteId?: string;
+  isPage?: boolean;
 }
 
 type ActiveTab = "add" | "color" | "menu" | "reminder" | null;
@@ -46,6 +47,7 @@ const AddorUpdateNote = ({
   onSave,
   mode,
   noteId,
+  isPage = true,
 }: AddorUpdateNoteProps) => {
   const router = useRouter();
   const [note, setNote] = useState<Note | null>(initialNote || null);
@@ -71,7 +73,7 @@ const AddorUpdateNote = ({
         try {
           setLoading(true);
           const response = await getNoteById(noteId);
-          setNote(response.data);
+          setNote(response.note);
         } catch (err) {
           setError("Failed to fetch note");
         } finally {
@@ -218,12 +220,27 @@ const AddorUpdateNote = ({
     { name: "White", class: "bg-white" },
   ];
 
+  const isDarkBackground = (theme: string) => {
+    const darkThemes = ["bg-gray-600", "bg-[#1F2937]"];
+    return darkThemes.includes(theme);
+  };
+
+  const getTextColor = (theme: string) => {
+    return isDarkBackground(theme) ? "text-white" : "text-[#1F2937]";
+  };
+
+  const getPlaceholderColor = (theme: string) => {
+    return isDarkBackground(theme)
+      ? "placeholder:text-white/50"
+      : "placeholder:text-[#1F2937]/50";
+  };
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+      className={`${isPage ? "fixed inset-0" : "fixed inset-0 flex items-end justify-center bg-black/40 backdrop-blur-sm"} z-50 transition-opacity duration-300`}
       ref={backdropRef}
       onClick={(e) => {
-        if (e.target === backdropRef.current) {
+        if (!isPage && e.target === backdropRef.current) {
           if (onClose) {
             onClose();
           } else {
@@ -233,17 +250,17 @@ const AddorUpdateNote = ({
       }}
     >
       <div
-        className={`w-full max-w-md h-[90vh] ${form.theme} rounded-t-[40px] flex flex-col font-sans transition-all duration-500 shadow-2xl relative animate-in slide-in-from-bottom duration-500`}
+        className={`w-full ${isPage ? "h-screen" : "max-w-md h-[90vh] rounded-t-[40px] shadow-2xl"} ${form.theme} flex flex-col font-sans transition-all duration-500 relative animate-in ${isPage ? "fade-in" : "slide-in-from-bottom"} duration-500`}
       >
         {/* Toast Notification */}
         {toast && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-[#1F2937] text-white px-6 py-2 rounded-2xl text-xs font-bold shadow-xl animate-in fade-in slide-in-from-top-2">
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 bg-[#1F2937] text-white px-6 py-2 rounded-2xl text-xs font-bold shadow-xl animate-in fade-in slide-in-from-top-2">
             {toast}
           </div>
         )}
 
         {/* Header */}
-        <div className="w-full flex items-center justify-between p-6">
+        <div className="w-full flex items-center justify-between p-6 pt-12 md:pt-6">
           <button
             onClick={() => {
               if (onClose) {
@@ -252,46 +269,46 @@ const AddorUpdateNote = ({
                 router.back();
               }
             }}
-            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-gray-50/50 text-[#1F2937] hover:bg-gray-100/50 transition-all border border-gray-100/20"
+            className={`w-12 h-12 flex items-center justify-center rounded-2xl ${isDarkBackground(form.theme) ? "bg-white/10 text-white border-white/10" : "bg-gray-50/50 text-[#1F2937] border-gray-100/20"} hover:scale-105 transition-all border`}
           >
-            <IoMdArrowBack size={20} />
+            <IoMdArrowBack size={24} />
           </button>
 
           <div className="flex gap-3">
             <button
               onClick={() => toggleTab("reminder")}
-              className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all border border-gray-100/20 ${form.notifyAt ? "bg-[#7DD3FC] text-white" : "bg-gray-50/50 text-gray-400 hover:text-[#7DD3FC]"}`}
+              className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all border ${form.notifyAt ? "bg-[#7DD3FC] text-white border-[#7DD3FC]" : isDarkBackground(form.theme) ? "bg-white/10 text-white/60 border-white/10" : "bg-gray-50/50 text-gray-400 border-gray-100/20"}`}
             >
-              <LuBellPlus size={20} />
+              <LuBellPlus size={22} />
             </button>
             <button
               onClick={togglePin}
-              className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all border border-gray-100/20 ${form.isPinned ? "bg-[#6EE7B7] text-white font-bold" : "bg-gray-50/50 text-gray-400 hover:text-[#6EE7B7]"}`}
+              className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all border ${form.isPinned ? "bg-[#6EE7B7] text-white border-[#6EE7B7]" : isDarkBackground(form.theme) ? "bg-white/10 text-white/60 border-white/10" : "bg-gray-50/50 text-gray-400 border-gray-100/20"}`}
             >
-              <MdOutlinePushPin size={20} />
+              <MdOutlinePushPin size={22} />
             </button>
             <button
               onClick={toggleArchive}
-              className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all border border-gray-100/20 ${form.isArchived ? "bg-gray-600 text-white" : "bg-gray-50/50 text-gray-400 hover:text-gray-600"}`}
+              className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all border ${form.isArchived ? "bg-yellow-400 text-white border-yellow-400" : isDarkBackground(form.theme) ? "bg-white/10 text-white/60 border-white/10" : "bg-gray-50/50 text-gray-400 border-gray-100/20"}`}
             >
-              <RiInboxArchiveLine size={20} />
+              <RiInboxArchiveLine size={22} />
             </button>
           </div>
         </div>
 
         {error && (
-          <div className="mx-6 p-3 bg-red-50 text-red-500 text-xs font-bold rounded-xl border border-red-100 mb-4">
+          <div className="mx-6 p-4 bg-red-50/80 backdrop-blur-sm text-red-600 text-xs font-bold rounded-2xl border border-red-100 mb-4 animate-in shake duration-500">
             {error}
           </div>
         )}
 
         {/* Inputs */}
-        <div className="flex-grow flex flex-col p-6 gap-6 overflow-y-auto">
+        <div className="flex-grow flex flex-col px-8 gap-4 overflow-y-auto pb-32">
           <textarea
-            placeholder="Note Title"
+            placeholder="Title"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="w-full bg-transparent outline-none text-[#1F2937] text-4xl font-black tracking-tight placeholder:text-gray-200 resize-none"
+            className={`w-full bg-transparent outline-none ${getTextColor(form.theme)} text-4xl font-black tracking-tight ${getPlaceholderColor(form.theme)} resize-none transition-colors duration-300 drop-shadow-sm`}
             rows={1}
           />
 
@@ -299,16 +316,18 @@ const AddorUpdateNote = ({
             placeholder="Start typing your note here..."
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            className="w-full bg-transparent outline-none text-[#1F2937] text-xl font-medium leading-relaxed placeholder:text-gray-200 resize-none min-h-[200px]"
+            className={`w-full bg-transparent outline-none ${getTextColor(form.theme)} text-xl font-semibold leading-relaxed ${getPlaceholderColor(form.theme)} resize-none min-h-[400px] transition-colors duration-300`}
           />
         </div>
 
         {/* Premium Dock Toolbar */}
-        <div className="p-6 sticky bottom-0">
-          <div className="w-full bg-[#1F2937] rounded-[32px] p-2 flex flex-col shadow-2xl transition-all duration-300">
+        <div
+          className={`p-6 fixed bottom-0 left-0 right-0 z-50 ${isPage ? "max-w-2xl mx-auto" : ""}`}
+        >
+          <div className="w-full bg-[#1F2937]/90 backdrop-blur-md rounded-[32px] p-2 flex flex-col shadow-2xl transition-all duration-300 border border-white/10">
             {/* Expansion Area */}
             <div
-              className={`overflow-hidden transition-all duration-500 ease-in-out ${activeTab ? "max-h-[300px] opacity-100 p-4" : "max-h-0 opacity-0"}`}
+              className={`overflow-hidden transition-all duration-500 ease-in-out ${activeTab ? "max-h-[400px] opacity-100 p-4" : "max-h-0 opacity-0"}`}
             >
               {activeTab === "add" && (
                 <div className="grid grid-cols-3 gap-4">

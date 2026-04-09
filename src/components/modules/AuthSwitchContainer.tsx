@@ -4,11 +4,9 @@ import { CiMail } from "react-icons/ci";
 import { RiEyeCloseFill, RiEyeFill } from "react-icons/ri";
 import { TbLockPassword } from "react-icons/tb";
 import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa6";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ZodError } from "zod";
-
 import { loginSchema, registerSchema } from "../../validation/auth.schema";
 import { login, register } from "../../services/auth.service";
 import { useAuthStore } from "../../store/auth.store";
@@ -22,26 +20,23 @@ const AuthSwitchContainer: React.FC<AuthSwitchContainerProps> = ({
 }) => {
   const router = useRouter();
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
-
   const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    setIsLogin(initialMode === "login");
-  }, [initialMode]);
-
   const [form, setForm] = useState({
     email: "",
     password: "",
     confirmPassword: "",
   });
 
+  useEffect(() => {
+    setIsLogin(initialMode === "login");
+  }, [initialMode]);
+
   const handleSubmit = async () => {
     setError(null);
     setIsLoading(true);
-
     try {
       if (isLogin) {
         loginSchema.parse(form);
@@ -55,173 +50,149 @@ const AuthSwitchContainer: React.FC<AuthSwitchContainerProps> = ({
         setIsLogin(true);
       }
     } catch (err) {
-      if (err instanceof ZodError) {
-        setError(err.issues[0].message);
-      } else {
-        setError((err as any)?.message || "Something went wrong");
-      }
+      setError(
+        err instanceof ZodError
+          ? err.issues[0].message
+          : (err as any)?.message || "Something went wrong",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
+  const Field = ({
+    label,
+    icon: Icon,
+    type,
+    value,
+    onChange,
+    placeholder,
+    right,
+  }: any) => (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[11px] font-semibold text-[#999] uppercase tracking-widest">
+        {label}
+      </label>
+      <div className="flex items-center bg-[#F8F8F5] border border-[#EDECE6] rounded-2xl focus-within:border-[#1A1A1A]/30 focus-within:ring-2 focus-within:ring-[#1A1A1A]/5 transition-all">
+        <div className="pl-4 pr-3 text-[#C0BDB4]">
+          <Icon size={18} />
+        </div>
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className="w-full py-3.5 bg-transparent outline-none text-[#1A1A1A] text-[14px] font-medium placeholder:text-[#C8C5BC]"
+        />
+        {right}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="w-full flex flex-col bg-white rounded-3xl p-6 transition-all duration-500 ease-in-out">
-      {/* Header Info */}
-      <div className="mb-6 text-center">
-        <h3 className="text-xl font-bold text-gray-800">
-          {isLogin ? "Login to account" : "Create new account"}
-        </h3>
+    <div className="px-5 pt-5 pb-8 flex flex-col gap-4">
+      {/* Toggle */}
+      <div className="flex bg-[#F5F5F0] rounded-2xl p-1">
+        {["Sign in", "Register"].map((label, i) => {
+          const active = i === 0 ? isLogin : !isLogin;
+          return (
+            <button
+              key={label}
+              onClick={() => setIsLogin(i === 0)}
+              className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold tracking-tight transition-all duration-200 ${
+                active ? "bg-[#1A1A1A] text-white shadow-sm" : "text-[#999]"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="w-full flex flex-col">
-        {error && (
-          <div className="bg-red-50 text-red-500 text-xs font-medium px-4 py-2 rounded-lg mb-4 text-center border border-red-100 animate-shake">
-            {error}
-          </div>
-        )}
-
-        {/* Toggle with premium styling */}
-        <div className="w-full h-12 p-1 rounded-2xl bg-gray-100 flex items-center mb-8 relative">
-          <div
-            className={`absolute h-10 w-[calc(50%-4px)] bg-white rounded-xl shadow-sm transition-transform duration-300 ease-out z-0 ${
-              isLogin ? "translate-x-0" : "translate-x-full ml-1"
-            }`}
-          />
-          <button
-            onClick={() => setIsLogin(true)}
-            className={`flex-1 h-full z-10 font-bold text-sm transition-colors duration-300 ${
-              isLogin ? "text-gray-800" : "text-gray-400"
-            }`}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            className={`flex-1 h-full z-10 font-bold text-sm transition-colors duration-300 ${
-              !isLogin ? "text-gray-800" : "text-gray-400"
-            }`}
-          >
-            Register
-          </button>
+      {error && (
+        <div className="bg-red-50 text-red-500 text-[12px] font-medium px-4 py-2.5 rounded-xl border border-red-100 text-center">
+          {error}
         </div>
+      )}
 
-        {/* Inputs */}
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-bold text-gray-700 ml-1">
-              Email Address
-            </label>
-            <div className="flex items-center bg-gray-50 border border-gray-100 rounded-2xl focus-within:ring-2 focus-within:ring-[#7DD3FC]/20 focus-within:border-[#7DD3FC]/50 transition-all">
-              <div className="pl-4 pr-3 text-gray-400">
-                <CiMail size={20} />
-              </div>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="email@example.com"
-                className="w-full py-4 pr-4 bg-transparent outline-none text-gray-700 font-medium placeholder:text-gray-300"
-              />
-            </div>
-          </div>
+      <Field
+        label="Email"
+        icon={CiMail}
+        type="email"
+        value={form.email}
+        onChange={(e: any) => setForm({ ...form, email: e.target.value })}
+        placeholder="you@example.com"
+      />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-bold text-gray-700 ml-1">
-              Password
-            </label>
-            <div className="flex items-center bg-gray-50 border border-gray-100 rounded-2xl focus-within:ring-2 focus-within:ring-[#7DD3FC]/20 focus-within:border-[#7DD3FC]/50 transition-all">
-              <div className="pl-4 pr-3 text-gray-400">
-                <TbLockPassword size={20} />
-              </div>
-              <input
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="••••••••"
-                className="w-full py-4 bg-transparent outline-none text-gray-700 font-medium placeholder:text-gray-300"
-              />
-              <button
-                className="px-4 text-gray-300 hover:text-gray-500 transition-colors"
-                onClick={() => setShowPassword((p) => !p)}
-              >
-                {showPassword ? (
-                  <RiEyeFill size={18} />
-                ) : (
-                  <RiEyeCloseFill size={18} />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {!isLogin && (
-            <div className="flex flex-col gap-1.5 animate-in slide-in-from-top-2 duration-300">
-              <label className="text-sm font-bold text-gray-700 ml-1">
-                Confirm Password
-              </label>
-              <div className="flex items-center bg-gray-50 border border-gray-100 rounded-2xl focus-within:ring-2 focus-within:ring-[#6EE7B7]/20 focus-within:border-[#6EE7B7]/50 transition-all">
-                <div className="pl-4 pr-3 text-gray-400">
-                  <TbLockPassword size={20} />
-                </div>
-                <input
-                  type="password"
-                  value={form.confirmPassword}
-                  onChange={(e) =>
-                    setForm({ ...form, confirmPassword: e.target.value })
-                  }
-                  placeholder="••••••••"
-                  className="w-full py-4 pr-4 bg-transparent outline-none text-gray-700 font-medium placeholder:text-gray-300"
-                />
-              </div>
-            </div>
-          )}
-
-          {isLogin && (
-            <div className="flex justify-end">
-              <Link
-                href="/reset-password"
-                className="text-xs font-bold text-[#7DD3FC] hover:text-[#38BDF8] transition-colors"
-              >
-                Forgot Password?
-              </Link>
-            </div>
-          )}
-
+      <Field
+        label="Password"
+        icon={TbLockPassword}
+        type={showPassword ? "text" : "password"}
+        value={form.password}
+        onChange={(e: any) => setForm({ ...form, password: e.target.value })}
+        placeholder="••••••••"
+        right={
           <button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className={`w-full py-4 mt-2 rounded-2xl text-white font-bold text-lg shadow-lg transition-all active:scale-95 flex items-center justify-center ${
-              isLogin
-                ? "bg-[#7DD3FC] hover:shadow-[#7DD3FC]/30"
-                : "bg-[#6EE7B7] hover:shadow-[#6EE7B7]/30"
-            } ${isLoading ? "opacity-70 cursor-not-allowed" : ""}`}
+            className="px-4 text-[#C0BDB4] hover:text-[#888] transition-colors"
+            onClick={() => setShowPassword((p) => !p)}
           >
-            {isLoading ? (
-              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : isLogin ? (
-              "Login Now"
+            {showPassword ? (
+              <RiEyeFill size={16} />
             ) : (
-              "Register Now"
+              <RiEyeCloseFill size={16} />
             )}
           </button>
+        }
+      />
 
-          {/* Social login */}
-          <div className="flex items-center gap-4 my-4 opacity-50">
-            <hr className="flex-1 border-gray-100" />
-            <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400">
-              Or continue with
-            </span>
-            <hr className="flex-1 border-gray-100" />
-          </div>
+      {!isLogin && (
+        <Field
+          label="Confirm password"
+          icon={TbLockPassword}
+          type="password"
+          value={form.confirmPassword}
+          onChange={(e: any) =>
+            setForm({ ...form, confirmPassword: e.target.value })
+          }
+          placeholder="••••••••"
+        />
+      )}
 
-          <div className="flex gap-3">
-            <button className="flex-1 flex items-center justify-center gap-2 py-4 bg-gray-50 border border-gray-100 rounded-2xl hover:bg-gray-100 transition-all active:scale-95">
-              <FcGoogle size={22} />
-              <span className="text-sm font-bold text-gray-700">Google</span>
-            </button>
-          </div>
-        </div>
+      {isLogin && (
+        <Link
+          href="/reset-password"
+          className="text-[12px] font-semibold text-[#999] hover:text-[#1A1A1A] transition-colors text-right"
+        >
+          Forgot password?
+        </Link>
+      )}
+
+      <button
+        onClick={handleSubmit}
+        disabled={isLoading}
+        className="w-full py-4 mt-1 rounded-2xl bg-[#1A1A1A] text-white font-semibold text-[14px] tracking-tight shadow-sm active:scale-[0.97] transition-transform disabled:opacity-50 flex items-center justify-center"
+      >
+        {isLoading ? (
+          <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+        ) : isLogin ? (
+          "Sign in"
+        ) : (
+          "Create account"
+        )}
+      </button>
+
+      <div className="flex items-center gap-3">
+        <hr className="flex-1 border-[#EDECE6]" />
+        <span className="text-[10px] font-semibold text-[#C0BDB4] uppercase tracking-widest">
+          or
+        </span>
+        <hr className="flex-1 border-[#EDECE6]" />
       </div>
+
+      <button className="w-full py-3.5 bg-[#F8F8F5] border border-[#EDECE6] rounded-2xl flex items-center justify-center gap-2.5 text-[13px] font-semibold text-[#1A1A1A] active:scale-[0.97] transition-transform">
+        <FcGoogle size={18} />
+        Continue with Google
+      </button>
     </div>
   );
 };

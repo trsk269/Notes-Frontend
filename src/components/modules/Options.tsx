@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import HashTagSuggestions from "../molecules/HashTagSuggestions";
 import { getTags } from "../../services/tags.service";
 
 interface OptionsProps {
@@ -12,29 +11,30 @@ export default function Options({ onSelectTag, selectedTagId }: OptionsProps) {
 
   useEffect(() => {
     getTags().then((res) => {
-      if (res.tags) {
-        setTags(res.tags);
-      }
+      if (res.tags) setTags(res.tags);
     });
   }, []);
 
+  const all = [{ _id: "", name: "All" }, ...tags];
+
   return (
-    <div className="w-full flex flex-col justify-between items-center p-2 text-gray-400">
-      <div className="w-full flex overflow-x-auto gap-2 py-2 no-scrollbar">
-        <HashTagSuggestions
-          name="All"
-          active={selectedTagId === ""}
-          onClick={() => onSelectTag("")}
-        />
-        {tags.map((tag) => (
-          <HashTagSuggestions
+    <div className="flex gap-2 overflow-x-auto no-scrollbar py-2">
+      {all.map((tag) => {
+        const active = selectedTagId === tag._id;
+        return (
+          <button
             key={tag._id}
-            name={tag.name}
-            active={selectedTagId === tag._id}
             onClick={() => onSelectTag(tag._id)}
-          />
-        ))}
-      </div>
+            className={`px-4 py-2 rounded-full text-[12px] font-semibold whitespace-nowrap tracking-tight transition-all active:scale-95 ${
+              active
+                ? "bg-[#1A1A1A] text-white"
+                : "bg-white text-[#B0ADA4] border border-[#EDECE6]"
+            }`}
+          >
+            {tag.name}
+          </button>
+        );
+      })}
     </div>
   );
 }

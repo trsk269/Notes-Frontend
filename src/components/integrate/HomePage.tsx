@@ -2,9 +2,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import NavBar from "../modules/NavBar";
-import DefaultAdd from "../modules/DefaultAdd";
-import Options from "../modules/Options";
 import Results from "../modules/Results";
+import Options from "../modules/Options";
 import { Note } from "../../types/note";
 
 export default function HomePage() {
@@ -12,33 +11,22 @@ export default function HomePage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedTagId, setSelectedTagId] = useState("");
 
-  const openAddNote = () => {
-    router.push("/note/add");
-  };
-
-  const openEditNote = (note: Note) => {
-    router.push(`/note/edit/${note._id}`);
-  };
-
-  const handleRefresh = () => {
-    setRefreshKey((prev) => prev + 1);
-  };
+  const openAddNote = () => router.push("/note/add");
+  const openEditNote = (note: Note) => router.push(`/note/edit/${note._id}`);
 
   return (
-    <main className="min-h-screen w-full bg-[#F9FAFB] flex flex-col items-center overflow-x-hidden">
-      {/* Optimized content width for dashboard feel (constrained to md) */}
-      <div className="w-full max-w-md flex flex-col gap-6 py-8 px-4 sm:px-6">
-        <NavBar />
+    <main className="min-h-screen w-full bg-[#FAFAF8] flex flex-col items-center overflow-x-hidden">
+      <div className="w-full max-w-md flex flex-col h-screen">
+        <NavBar onAddClick={openAddNote} />
 
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
-          <DefaultAdd onAddClick={openAddNote} />
+        <div className="px-5 pt-1 pb-2 flex-shrink-0">
           <Options
             onSelectTag={setSelectedTagId}
             selectedTagId={selectedTagId}
           />
         </div>
 
-        <div className="mt-2 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <div className="flex-1 overflow-y-auto px-5 pb-8">
           <Results
             onNoteClick={openEditNote}
             refreshKey={refreshKey}

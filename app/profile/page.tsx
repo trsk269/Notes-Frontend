@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../src/store/auth.store";
 import { updateProfile, deleteAccount } from "../../src/services/user.service";
 import {
-  IoArrowBack,
+  IoChevronBack,
   IoCameraOutline,
   IoTrashOutline,
-  IoCheckmarkCircleOutline,
+  IoCheckmarkCircle,
   IoArchiveOutline,
 } from "react-icons/io5";
 
@@ -21,7 +21,8 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,38 +34,27 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  const handleBack = () => {
-    router.back();
-  };
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePic(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => setProfilePic(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async () => {
     setIsLoading(true);
-    setMessage({ type: "", text: "" });
+    setError("");
+    setSaved(false);
     try {
       const res = await updateProfile({ name, profilePic, username });
       setUser(res.user);
-      setMessage({ type: "success", text: "Profile updated successfully!" });
-      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
-    } catch (error: any) {
-      setMessage({
-        type: "error",
-        text: error.message || "Failed to update profile",
-      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to update profile");
     } finally {
-      setIsLoading(true);
-      // Artificial delay for smooth feel
-      setTimeout(() => setIsLoading(false), 500);
+      setTimeout(() => setIsLoading(false), 400);
     }
   };
 
@@ -74,11 +64,8 @@ export default function ProfilePage() {
       await deleteAccount();
       logout();
       router.push("/login");
-    } catch (error: any) {
-      setMessage({
-        type: "error",
-        text: error.message || "Failed to delete account",
-      });
+    } catch (err: any) {
+      setError(err.message || "Failed to delete account");
       setIsDeleting(false);
     }
   };
@@ -86,192 +73,216 @@ export default function ProfilePage() {
   const initial = (name || username || "U").charAt(0).toUpperCase();
 
   return (
-    <main className="min-h-screen w-full bg-[#F9FAFB] flex flex-col items-center overflow-x-hidden">
-      <div className="w-full max-w-md flex flex-col gap-8 py-8 px-4 sm:px-6">
-        {/* Header */}
-        <header className="flex items-center justify-between">
-          <button
-            onClick={handleBack}
-            className="p-3 bg-white text-gray-600 hover:text-[#7DD3FC] hover:bg-sky-50 rounded-2xl transition-all duration-300 shadow-sm border border-gray-100/50"
-          >
-            <IoArrowBack size={22} />
-          </button>
-          <h1 className="text-2xl font-black text-[#1F2937]">Profile</h1>
-          <div className="w-10"></div> {/* Spacer for symmetry */}
-        </header>
-
-        {/* Profile Pic Section */}
-        <div className="flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="relative group/photo">
-            <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-tr from-[#7DD3FC] to-[#6EE7B7] p-1 shadow-2xl shadow-sky-100 items-center justify-center flex overflow-hidden">
-              {profilePic ? (
-                <img
-                  src={profilePic}
-                  alt="Profile"
-                  className="w-full h-full object-cover rounded-[2.3rem]"
-                />
-              ) : (
-                <span className="text-white text-5xl font-black">
-                  {initial}
-                </span>
-              )}
-            </div>
+    <main className="h-screen w-full bg-[#FAFAF8] flex flex-col items-center overflow-hidden">
+      <div className="w-full max-w-md h-full flex flex-col">
+        {/* ── Dark hero header ── */}
+        <div className="bg-[#1A1A1A] px-5 pt-5 pb-7 flex-shrink-0">
+          {/* Top bar */}
+          <div className="flex items-center justify-between mb-5">
             <button
-              onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-2 -right-2 p-3 bg-white text-[#1F2937] rounded-2xl shadow-xl shadow-sky-100 border border-gray-100 group-hover/photo:scale-110 group-hover/photo:bg-[#7DD3FC] group-hover/photo:text-white transition-all duration-300"
+              onClick={() => router.back()}
+              className="w-[34px] h-[34px] bg-white/8 rounded-[11px] flex items-center justify-center active:scale-95 transition-transform"
+              style={{ background: "rgba(255,255,255,0.08)" }}
             >
-              <IoCameraOutline size={22} />
+              <IoChevronBack size={16} color="rgba(255,255,255,0.6)" />
             </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-          </div>
-          <div className="text-center">
-            <h2 className="text-xl font-extrabold text-[#1F2937]">
-              {name || username || "Account User"}
-            </h2>
-            <p className="text-gray-400 font-medium">{user?.email}</p>
-          </div>
-        </div>
 
-        {/* Form Section */}
-        <div className="flex flex-col gap-5 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-1">
-              Email (Read-only)
-            </label>
-            <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl text-gray-500 font-medium overflow-hidden text-ellipsis">
-              {user?.email}
-            </div>
-          </div>
+            <span className="text-[11px] font-bold text-white/35 uppercase tracking-widest">
+              Profile
+            </span>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-1">
-              Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
-              className="p-4 bg-white border border-gray-100 rounded-2xl text-[#1F2937] font-semibold outline-none focus:border-[#7DD3FC] focus:ring-4 focus:ring-sky-100 transition-all duration-300"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-1">
-              Username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Pick a username"
-              className="p-4 bg-white border border-gray-100 rounded-2xl text-[#1F2937] font-semibold outline-none focus:border-[#6EE7B7] focus:ring-4 focus:ring-emerald-100 transition-all duration-300"
-            />
-          </div>
-
-          {message.text && (
-            <div
-              className={`p-4 rounded-2xl flex items-center gap-3 animate-in zoom-in-95 duration-300 ${
-                message.type === "success"
-                  ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                  : "bg-red-50 text-red-600 border border-red-100"
-              }`}
-            >
-              <IoCheckmarkCircleOutline size={20} />
-              <span className="font-bold text-sm">{message.text}</span>
-            </div>
-          )}
-
-          <button
-            onClick={handleSave}
-            disabled={isLoading}
-            className="mt-4 p-4 bg-gradient-to-r from-[#7DD3FC] to-[#6EE7B7] text-white font-black text-lg rounded-[1.8rem] shadow-xl shadow-sky-100 hover:shadow-2xl hover:shadow-sky-200 hover:scale-[1.02] active:scale-95 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {isLoading ? "Saving Changes..." : "Save Changes"}
-          </button>
-        </div>
-
-        {/* Notes Management */}
-        <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
-          <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-1">
-            Notes Management
-          </label>
-          <button
-            onClick={() => router.push("/archive")}
-            className="w-full p-6 bg-white border border-gray-100 rounded-[2rem] flex items-center justify-between group hover:border-[#7DD3FC] transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-sky-100/20"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-sky-50 text-[#7DD3FC] rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <IoArchiveOutline size={24} />
-              </div>
-              <div className="text-left">
-                <h3 className="text-lg font-bold text-[#1F2937]">
-                  Archived Notes
-                </h3>
-                <p className="text-sm text-gray-400 font-medium">
-                  View and restore hidden notes
-                </p>
-              </div>
-            </div>
-            <div className="w-10 h-10 flex items-center justify-center text-gray-300 group-hover:text-[#7DD3FC] transition-colors">
-              <IoArrowBack size={20} className="rotate-180" />
-            </div>
-          </button>
-        </div>
-
-        {/* Danger Zone */}
-        <div className="mt-8 border-t border-gray-100 pt-8 animate-in fade-in slide-in-from-bottom-10 duration-1000">
-          <label className="text-sm font-bold text-red-400 uppercase tracking-widest pl-1">
-            Danger Zone
-          </label>
-
-          {!showDeleteConfirm ? (
             <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="mt-4 w-full p-4 bg-white text-red-500 border border-red-100 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 transition-all duration-300 group"
+              onClick={handleSave}
+              disabled={isLoading}
+              className={`px-[14px] py-[8px] rounded-[11px] text-[12px] font-bold tracking-tight transition-all active:scale-95 ${
+                saved ? "bg-[#22C55E] text-white" : "bg-white text-[#1A1A1A]"
+              } disabled:opacity-60`}
             >
-              <IoTrashOutline
-                size={20}
-                className="group-hover:rotate-12 transition-transform"
+              {isLoading ? "Saving…" : saved ? "Saved" : "Save"}
+            </button>
+          </div>
+
+          {/* Avatar + identity */}
+          <div className="flex items-center gap-4">
+            <div className="relative flex-shrink-0">
+              <div className="w-[60px] h-[60px] bg-[#2E2E2E] rounded-[20px] border border-white/10 flex items-center justify-center overflow-hidden">
+                {profilePic ? (
+                  <img
+                    src={profilePic}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-white text-[26px] font-extrabold">
+                    {initial}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute -bottom-[5px] -right-[5px] w-[22px] h-[22px] bg-white rounded-[8px] flex items-center justify-center active:scale-90 transition-transform"
+              >
+                <IoCameraOutline size={12} color="#1A1A1A" />
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleImageChange}
               />
-              Delete Account
-            </button>
-          ) : (
-            <div className="mt-4 p-6 bg-red-50 border border-red-100 rounded-[2rem] flex flex-col gap-4 animate-in zoom-in-95 duration-300">
-              <div className="flex flex-col gap-1">
-                <h3 className="text-red-600 font-extrabold text-lg">
-                  Are you absolutely sure?
-                </h3>
-                <p className="text-red-500/80 text-sm font-medium leading-relaxed">
-                  This will permanently delete your account and all your notes.
-                  This action cannot be undone.
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 p-3 bg-white text-gray-600 font-bold rounded-xl border border-gray-100"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={isDeleting}
-                  className="flex-1 p-3 bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 active:scale-95 transition-all"
-                >
-                  {isDeleting ? "Deleting..." : "Yes, Delete"}
-                </button>
-              </div>
+            </div>
+            <div>
+              <p className="text-white text-[17px] font-extrabold tracking-tight leading-tight">
+                {name || username || "Account User"}
+              </p>
+              <p className="text-white/35 text-[11px] mt-0.5">{user?.email}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Scrollable body ── */}
+        <div className="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-3">
+          {/* Success toast */}
+          {saved && (
+            <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-[14px] px-4 py-3 flex items-center gap-3">
+              <IoCheckmarkCircle size={16} color="#22C55E" />
+              <span className="text-[12px] font-bold text-[#16A34A]">
+                Profile updated successfully
+              </span>
             </div>
           )}
+
+          {/* Error toast */}
+          {error && (
+            <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-[14px] px-4 py-3">
+              <span className="text-[12px] font-bold text-[#EF4444]">
+                {error}
+              </span>
+            </div>
+          )}
+
+          {/* Fields */}
+          <Field label="Email" readOnly value={user?.email || ""} />
+          <Field
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your full name"
+          />
+          <Field
+            label="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="@username"
+          />
+
+          {/* Notes management */}
+          <div className="flex flex-col gap-2 mt-1">
+            <span className="text-[9px] font-bold text-[#B0ADA4] uppercase tracking-widest pl-0.5">
+              Notes
+            </span>
+            <button
+              onClick={() => router.push("/archive")}
+              className="w-full bg-white border border-[#EDECE6] rounded-[16px] px-[14px] py-[13px] flex items-center justify-between active:scale-[0.98] transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-[36px] h-[36px] bg-[#F5F5F0] rounded-[12px] flex items-center justify-center flex-shrink-0">
+                  <IoArchiveOutline size={17} color="#888" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[13px] font-bold text-[#1A1A1A] tracking-tight">
+                    Archived Notes
+                  </p>
+                  <p className="text-[10px] text-[#B0ADA4] mt-0.5">
+                    View and restore hidden notes
+                  </p>
+                </div>
+              </div>
+              <IoChevronBack size={14} color="#C8C5BC" className="rotate-180" />
+            </button>
+          </div>
+
+          {/* Danger zone */}
+          <div className="mt-1">
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full bg-white border border-[#FECACA] rounded-[16px] px-[14px] py-[13px] flex items-center gap-3 active:scale-[0.98] transition-transform"
+              >
+                <div className="w-[36px] h-[36px] bg-[#FEF2F2] rounded-[12px] flex items-center justify-center flex-shrink-0">
+                  <IoTrashOutline size={16} color="#EF4444" />
+                </div>
+                <span className="text-[13px] font-bold text-[#EF4444] tracking-tight">
+                  Delete account
+                </span>
+              </button>
+            ) : (
+              <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-[16px] p-[14px] flex flex-col gap-3">
+                <div>
+                  <p className="text-[13px] font-extrabold text-[#EF4444] tracking-tight">
+                    Delete your account?
+                  </p>
+                  <p className="text-[11px] text-[#F87171] mt-1 leading-relaxed">
+                    This permanently removes your account and all notes. This
+                    cannot be undone.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="flex-1 py-[10px] bg-white border border-[#EDECE6] rounded-[11px] text-[12px] font-bold text-[#888] active:scale-95 transition-transform"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting}
+                    className="flex-1 py-[10px] bg-[#EF4444] rounded-[11px] text-[12px] font-bold text-white active:scale-95 transition-transform disabled:opacity-60"
+                  >
+                    {isDeleting ? "Deleting…" : "Yes, delete"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </main>
+  );
+}
+
+/* ── Field atom ── */
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  readOnly = false,
+}: {
+  label: string;
+  value: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  readOnly?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-[5px]">
+      <span className="text-[9px] font-bold text-[#B0ADA4] uppercase tracking-widest pl-0.5">
+        {label}
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        readOnly={readOnly}
+        className={`w-full px-[14px] py-[12px] rounded-[14px] text-[13px] font-semibold outline-none border transition-all ${
+          readOnly
+            ? "bg-[#F5F5F0] border-[#EDECE6] text-[#B0ADA4] cursor-default"
+            : "bg-white border-[#EDECE6] text-[#1A1A1A] focus:border-[#1A1A1A]/30 focus:ring-2 focus:ring-[#1A1A1A]/5"
+        }`}
+      />
+    </div>
   );
 }

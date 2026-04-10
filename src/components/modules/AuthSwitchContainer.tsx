@@ -15,6 +15,35 @@ interface AuthSwitchContainerProps {
   initialMode?: "login" | "register";
 }
 
+const Field = ({
+  label,
+  icon: Icon,
+  type,
+  value,
+  onChange,
+  placeholder,
+  right,
+}: any) => (
+  <div className="flex flex-col gap-1.5">
+    <label className="text-[11px] font-semibold text-[#999] uppercase tracking-widest">
+      {label}
+    </label>
+    <div className="flex items-center bg-[#F8F8F5] border border-[#EDECE6] rounded-2xl focus-within:border-[#1A1A1A]/30 focus-within:ring-2 focus-within:ring-[#1A1A1A]/5 transition-all">
+      <div className="pl-4 pr-3 text-[#C0BDB4]">
+        <Icon size={18} />
+      </div>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full py-3.5 bg-transparent outline-none text-[#1A1A1A] text-[14px] font-medium placeholder:text-[#C8C5BC]"
+      />
+      {right}
+    </div>
+  </div>
+);
+
 const AuthSwitchContainer: React.FC<AuthSwitchContainerProps> = ({
   initialMode = "login",
 }) => {
@@ -59,35 +88,6 @@ const AuthSwitchContainer: React.FC<AuthSwitchContainerProps> = ({
       setIsLoading(false);
     }
   };
-
-  const Field = ({
-    label,
-    icon: Icon,
-    type,
-    value,
-    onChange,
-    placeholder,
-    right,
-  }: any) => (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[11px] font-semibold text-[#999] uppercase tracking-widest">
-        {label}
-      </label>
-      <div className="flex items-center bg-[#F8F8F5] border border-[#EDECE6] rounded-2xl focus-within:border-[#1A1A1A]/30 focus-within:ring-2 focus-within:ring-[#1A1A1A]/5 transition-all">
-        <div className="pl-4 pr-3 text-[#C0BDB4]">
-          <Icon size={18} />
-        </div>
-        <input
-          type={type}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          className="w-full py-3.5 bg-transparent outline-none text-[#1A1A1A] text-[14px] font-medium placeholder:text-[#C8C5BC]"
-        />
-        {right}
-      </div>
-    </div>
-  );
 
   return (
     <div className="px-5 pt-5 pb-8 flex flex-col gap-4">

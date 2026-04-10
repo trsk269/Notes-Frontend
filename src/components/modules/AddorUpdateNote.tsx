@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { IoMdArrowBack } from "react-icons/io";
+import { IoChevronBack } from "react-icons/io5";
 import { LuBellPlus } from "react-icons/lu";
 import { RiInboxArchiveLine } from "react-icons/ri";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -248,13 +248,21 @@ const AddorUpdateNote = ({
   };
 
   const getTextColor = (theme: string) => {
-    return isDarkBackground(theme) ? "text-white" : "text-[#1F2937]";
+    return isDarkBackground(theme) ? "text-white" : "text-[#1A1A1A]";
   };
 
   const getPlaceholderColor = (theme: string) => {
     return isDarkBackground(theme)
-      ? "placeholder:text-white/50"
-      : "placeholder:text-[#1F2937]/50";
+      ? "placeholder:text-white/40"
+      : "placeholder:text-[#1A1A1A]/25";
+  };
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      router.back();
+    }
   };
 
   return (
@@ -262,92 +270,114 @@ const AddorUpdateNote = ({
       className={`${isPage ? "fixed inset-0" : "fixed inset-0 flex items-end justify-center bg-black/40 backdrop-blur-sm"} z-50 transition-opacity duration-300`}
       ref={backdropRef}
       onClick={(e) => {
-        if (!isPage && e.target === backdropRef.current) {
-          if (onClose) {
-            onClose();
-          } else {
-            router.back();
-          }
-        }
+        if (!isPage && e.target === backdropRef.current) handleClose();
       }}
     >
       <div
-        className={`w-full ${isPage ? "h-screen" : "max-w-md h-[90vh] rounded-t-[40px] shadow-2xl"} ${form.theme} flex flex-col font-sans transition-all duration-500 relative animate-in ${isPage ? "fade-in" : "slide-in-from-bottom"} duration-500`}
+        className={`w-full ${isPage ? "h-screen" : "max-w-md h-[90vh] rounded-t-[36px] shadow-2xl"} ${form.theme || "bg-[#FAFAF8]"} flex flex-col font-sans transition-all duration-500 relative animate-in ${isPage ? "fade-in" : "slide-in-from-bottom"} duration-500`}
       >
-        {/* Toast Notification */}
+        {/* ── Toast ── */}
         {toast && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 bg-[#1F2937] text-white px-6 py-2 rounded-2xl text-xs font-bold shadow-xl animate-in fade-in slide-in-from-top-2">
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 bg-[#1A1A1A] text-white px-5 py-2 rounded-full text-[12px] font-semibold shadow-xl animate-in fade-in slide-in-from-top-2 whitespace-nowrap">
             {toast}
           </div>
         )}
 
-        {/* Header */}
-        <div className="w-full flex items-center justify-between p-6 pt-12 md:pt-6">
+        {/* ── Header ── */}
+        <div className="w-full flex items-center justify-between px-5 pt-12 pb-4 md:pt-5 flex-shrink-0">
+          {/* Back */}
           <button
-            onClick={() => {
-              if (onClose) {
-                onClose();
-              } else {
-                router.back();
-              }
-            }}
-            className={`w-12 h-12 flex items-center justify-center rounded-2xl ${isDarkBackground(form.theme) ? "bg-white/10 text-white border-white/10" : "bg-gray-50/50 text-[#1F2937] border-gray-100/20"} hover:scale-105 transition-all border`}
+            onClick={handleClose}
+            className={`w-[38px] h-[38px] flex items-center justify-center rounded-[13px] border transition-all active:scale-95 ${
+              isDarkBackground(form.theme)
+                ? "bg-white/10 border-white/10 text-white"
+                : "bg-white/70 border-[#EDECE6] text-[#1A1A1A]"
+            }`}
           >
-            <IoMdArrowBack size={24} />
+            <IoChevronBack size={18} />
           </button>
 
-          <div className="flex gap-3">
+          {/* Action buttons */}
+          <div className="flex gap-2">
+            {/* Reminder */}
             <button
               onClick={() => toggleTab("reminder")}
-              className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all border ${form.notifyAt ? "bg-[#7DD3FC] text-white border-[#7DD3FC]" : isDarkBackground(form.theme) ? "bg-white/10 text-white/60 border-white/10" : "bg-gray-50/50 text-gray-400 border-gray-100/20"}`}
+              className={`w-[38px] h-[38px] flex items-center justify-center rounded-[13px] border transition-all active:scale-95 ${
+                form.notifyAt
+                  ? "bg-[#1A1A1A] text-white border-[#1A1A1A]"
+                  : isDarkBackground(form.theme)
+                    ? "bg-white/10 border-white/10 text-white/60"
+                    : "bg-white/70 border-[#EDECE6] text-[#888]"
+              }`}
             >
-              <LuBellPlus size={22} />
+              <LuBellPlus size={18} />
             </button>
+
+            {/* Pin */}
             <button
               onClick={togglePin}
-              className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all border ${form.isPinned ? "bg-[#6EE7B7] text-white border-[#6EE7B7]" : isDarkBackground(form.theme) ? "bg-white/10 text-white/60 border-white/10" : "bg-gray-50/50 text-gray-400 border-gray-100/20"}`}
+              className={`w-[38px] h-[38px] flex items-center justify-center rounded-[13px] border transition-all active:scale-95 ${
+                form.isPinned
+                  ? "bg-[#1A1A1A] text-white border-[#1A1A1A]"
+                  : isDarkBackground(form.theme)
+                    ? "bg-white/10 border-white/10 text-white/60"
+                    : "bg-white/70 border-[#EDECE6] text-[#888]"
+              }`}
             >
-              <MdOutlinePushPin size={22} />
+              <MdOutlinePushPin size={18} />
             </button>
+
+            {/* Archive */}
             <button
               onClick={toggleArchive}
-              className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all border ${form.isArchived ? "bg-yellow-400 text-white border-yellow-400" : isDarkBackground(form.theme) ? "bg-white/10 text-white/60 border-white/10" : "bg-gray-50/50 text-gray-400 border-gray-100/20"}`}
+              className={`w-[38px] h-[38px] flex items-center justify-center rounded-[13px] border transition-all active:scale-95 ${
+                form.isArchived
+                  ? "bg-[#1A1A1A] text-white border-[#1A1A1A]"
+                  : isDarkBackground(form.theme)
+                    ? "bg-white/10 border-white/10 text-white/60"
+                    : "bg-white/70 border-[#EDECE6] text-[#888]"
+              }`}
             >
-              <RiInboxArchiveLine size={22} />
+              <RiInboxArchiveLine size={18} />
             </button>
           </div>
         </div>
 
+        {/* ── Error ── */}
         {error && (
-          <div className="mx-6 p-4 bg-red-50/80 backdrop-blur-sm text-red-600 text-xs font-bold rounded-2xl border border-red-100 mb-4 animate-in shake duration-500">
+          <div className="mx-5 mb-3 px-4 py-3 bg-red-50 border border-red-100 text-red-500 text-[12px] font-semibold rounded-[14px] flex-shrink-0">
             {error}
           </div>
         )}
 
-        {/* Inputs */}
-        <div className="flex-grow flex flex-col px-8 gap-4 overflow-y-auto pb-32">
+        {/* ── Text inputs ── */}
+        <div className="flex-1 flex flex-col px-6 gap-3 overflow-y-auto pb-36">
           <textarea
             placeholder="Title"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className={`w-full bg-transparent outline-none ${getTextColor(form.theme)} text-4xl font-black tracking-tight ${getPlaceholderColor(form.theme)} resize-none transition-colors duration-300 drop-shadow-sm`}
+            className={`w-full bg-transparent outline-none ${getTextColor(form.theme)} text-[32px] font-extrabold tracking-tight leading-tight ${getPlaceholderColor(form.theme)} resize-none`}
             rows={1}
           />
 
           <textarea
-            placeholder="Start typing your note here..."
+            placeholder="Start typing your note here…"
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            className={`w-full bg-transparent outline-none ${getTextColor(form.theme)} text-xl font-semibold leading-relaxed ${getPlaceholderColor(form.theme)} resize-none min-h-[400px] transition-colors duration-300`}
+            className={`w-full bg-transparent outline-none ${getTextColor(form.theme)} text-[16px] font-normal leading-relaxed ${getPlaceholderColor(form.theme)} resize-none min-h-[360px]`}
           />
 
-          {/* Tag Chips */}
+          {/* Tag chips */}
           {form.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
+            <div className="flex flex-wrap gap-2 mt-2">
               {form.tags.map((tag) => (
                 <div
                   key={tag._id}
-                  className="flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-xs font-bold text-[#1F2937]"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border ${
+                    isDarkBackground(form.theme)
+                      ? "bg-white/10 border-white/15 text-white/70"
+                      : "bg-[#F5F5F0] border-[#EDECE6] text-[#888]"
+                  }`}
                 >
                   #{tag.name}
                   <button
@@ -357,8 +387,9 @@ const AddorUpdateNote = ({
                         tags: form.tags.filter((t) => t._id !== tag._id),
                       })
                     }
+                    className="opacity-60 hover:opacity-100 transition-opacity"
                   >
-                    <IoCloseOutline size={14} />
+                    <IoCloseOutline size={13} />
                   </button>
                 </div>
               ))}
@@ -366,26 +397,33 @@ const AddorUpdateNote = ({
           )}
         </div>
 
-        {/* Premium Dock Toolbar */}
+        {/* ── Dock toolbar ── */}
         <div
-          className={`p-6 fixed bottom-0 left-0 right-0 z-50 ${isPage ? "max-w-2xl mx-auto" : ""}`}
+          className={`p-4 fixed bottom-0 left-0 right-0 z-50 ${isPage ? "max-w-2xl mx-auto" : ""}`}
         >
-          <div className="w-full bg-[#1F2937]/90 backdrop-blur-md rounded-[32px] p-2 flex flex-col shadow-2xl transition-all duration-300 border border-white/10">
-            {/* Expansion Area */}
+          <div className="w-full bg-[#1A1A1A] rounded-[28px] p-1.5 flex flex-col shadow-2xl border border-white/8 transition-all duration-300">
+            {/* Expansion panel */}
             <div
-              className={`overflow-hidden transition-all duration-500 ease-in-out ${activeTab ? "max-h-[400px] opacity-100 p-4" : "max-h-0 opacity-0"}`}
+              className={`overflow-hidden transition-all duration-400 ease-in-out ${
+                activeTab
+                  ? "max-h-[380px] opacity-100 px-3 pt-4 pb-2"
+                  : "max-h-0 opacity-0"
+              }`}
             >
               {activeTab === "add" && (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-5 gap-2 pb-3">
                   {addMenuItems.map((item, idx) => (
                     <button
                       key={idx}
                       className="flex flex-col items-center gap-2 group"
                     >
-                      <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white group-hover:bg-white/20 transition-all">
-                        <item.icon size={20} />
+                      <div
+                        className="w-11 h-11 bg-white/8 rounded-[14px] flex items-center justify-center text-white/70 group-hover:bg-white/15 group-active:scale-95 transition-all"
+                        style={{ background: "rgba(255,255,255,0.08)" }}
+                      >
+                        <item.icon size={19} />
                       </div>
-                      <span className="text-[10px] text-white/60 font-bold uppercase tracking-widest text-center">
+                      <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center leading-tight">
                         {item.label}
                       </span>
                     </button>
@@ -394,178 +432,201 @@ const AddorUpdateNote = ({
               )}
 
               {activeTab === "color" && (
-                <div className="flex flex-col gap-4">
-                  <span className="text-white/60 text-[10px] font-black uppercase tracking-widest px-2">
-                    Palette
+                <div className="flex flex-col gap-3 pb-3">
+                  <span className="text-white/35 text-[9px] font-bold uppercase tracking-widest">
+                    Note color
                   </span>
-                  <div className="flex gap-3 overflow-x-auto pb-2 px-2 scrollbar-hide">
+                  <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
                     {colors.map((color, idx) => (
                       <button
                         key={idx}
                         onClick={() => setForm({ ...form, theme: color.class })}
-                        className={`w-10 h-10 rounded-full border-2 ${form.theme === color.class ? "border-white" : "border-white/20"} flex-shrink-0 ${color.class} hover:scale-110 transition-transform`}
-                      ></button>
+                        className={`w-9 h-9 rounded-full flex-shrink-0 border-2 transition-all active:scale-95 ${
+                          form.theme === color.class
+                            ? "border-white scale-110"
+                            : "border-white/20 hover:border-white/50"
+                        } ${color.class}`}
+                      />
                     ))}
                   </div>
                 </div>
               )}
 
               {activeTab === "menu" && (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-1 pb-3">
                   {moreMenuItems.map((item, idx) => (
                     <button
                       key={idx}
                       onClick={item.onClick}
-                      className="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/10 text-white transition-all text-left"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-[14px] text-white transition-all active:scale-[0.97] text-left"
+                      style={{ background: "rgba(255,255,255,0.05)" }}
                     >
-                      <item.icon size={18} className="text-white/60" />
-                      <span className="text-sm font-bold">{item.label}</span>
+                      <item.icon
+                        size={16}
+                        className="text-white/50 flex-shrink-0"
+                      />
+                      <span className="text-[13px] font-semibold">
+                        {item.label}
+                      </span>
                     </button>
                   ))}
                 </div>
               )}
 
               {activeTab === "reminder" && (
-                <div className="flex flex-col gap-4">
-                  <span className="text-white/60 text-[10px] font-black uppercase tracking-widest px-2">
-                    Set Reminder
+                <div className="flex flex-col gap-3 pb-3">
+                  <span className="text-white/35 text-[9px] font-bold uppercase tracking-widest">
+                    Set reminder
                   </span>
-                  <div className="px-2">
-                    <input
-                      type="datetime-local"
-                      value={
-                        form.notifyAt
-                          ? new Date(form.notifyAt).toISOString().slice(0, 16)
-                          : ""
-                      }
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          notifyAt: e.target.value
-                            ? new Date(e.target.value).toISOString()
-                            : null,
-                        })
-                      }
-                      className="w-full bg-white/10 text-white border border-white/20 rounded-xl p-3 outline-none focus:border-white/40 transition-all font-bold"
-                    />
-                  </div>
+                  <input
+                    type="datetime-local"
+                    value={
+                      form.notifyAt
+                        ? new Date(form.notifyAt).toISOString().slice(0, 16)
+                        : ""
+                    }
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        notifyAt: e.target.value
+                          ? new Date(e.target.value).toISOString()
+                          : null,
+                      })
+                    }
+                    className="w-full text-white border border-white/15 rounded-[14px] px-4 py-3 outline-none focus:border-white/30 transition-all text-[13px] font-semibold"
+                    style={{ background: "rgba(255,255,255,0.08)" }}
+                  />
                 </div>
               )}
 
               {activeTab === "tags" && (
-                <div className="flex flex-col gap-4">
-                  <span className="text-white/60 text-[10px] font-black uppercase tracking-widest px-2">
-                    Manage Tags
+                <div className="flex flex-col gap-3 pb-3">
+                  <span className="text-white/35 text-[9px] font-bold uppercase tracking-widest">
+                    Manage tags
                   </span>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Add new tag..."
-                        value={newTagName}
-                        onChange={(e) => setNewTagName(e.target.value)}
-                        className="flex-1 bg-white/10 text-white border border-white/20 rounded-xl p-3 outline-none focus:border-white/40 text-sm font-bold"
-                      />
-                      <button
-                        onClick={async () => {
-                          if (!newTagName.trim()) return;
-                          try {
-                            const res = await createTag(newTagName);
-                            if (res.tag) {
-                              setAllTags([...allTags, res.tag]);
-                              if (
-                                !form.tags.find((t) => t._id === res.tag._id)
-                              ) {
-                                setForm({
-                                  ...form,
-                                  tags: [...form.tags, res.tag],
-                                });
-                              }
-                              setNewTagName("");
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="New tag name…"
+                      value={newTagName}
+                      onChange={(e) => setNewTagName(e.target.value)}
+                      className="flex-1 text-white border border-white/15 rounded-[12px] px-3 py-2.5 outline-none focus:border-white/30 text-[13px] font-semibold placeholder:text-white/25"
+                      style={{ background: "rgba(255,255,255,0.08)" }}
+                    />
+                    <button
+                      onClick={async () => {
+                        if (!newTagName.trim()) return;
+                        try {
+                          const res = await createTag(newTagName);
+                          if (res.tag) {
+                            setAllTags([...allTags, res.tag]);
+                            if (!form.tags.find((t) => t._id === res.tag._id)) {
+                              setForm({
+                                ...form,
+                                tags: [...form.tags, res.tag],
+                              });
                             }
-                          } catch (err) {
-                            showToast("Failed to create tag");
+                            setNewTagName("");
                           }
-                        }}
-                        className="bg-[#6EE7B7] text-[#1F2937] px-4 rounded-xl font-bold text-xs"
-                      >
-                        Add
-                      </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto no-scrollbar py-2">
-                      {allTags.map((tag) => {
-                        const isSelected = form.tags.some(
-                          (t) => t._id === tag._id,
-                        );
-                        return (
-                          <button
-                            key={tag._id}
-                            onClick={() => {
-                              if (isSelected) {
-                                setForm({
-                                  ...form,
-                                  tags: form.tags.filter(
-                                    (t) => t._id !== tag._id,
-                                  ),
-                                });
-                              } else {
-                                setForm({ ...form, tags: [...form.tags, tag] });
-                              }
-                            }}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                              isSelected
-                                ? "bg-[#7DD3FC] text-white border-[#7DD3FC]"
-                                : "bg-white/10 text-white/60 border-white/10 hover:border-white/40"
-                            }`}
-                          >
-                            #{tag.name}
-                          </button>
-                        );
-                      })}
-                    </div>
+                        } catch (err) {
+                          showToast("Failed to create tag");
+                        }
+                      }}
+                      className="px-4 py-2.5 bg-white text-[#1A1A1A] rounded-[12px] font-bold text-[12px] active:scale-95 transition-transform"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 max-h-[100px] overflow-y-auto no-scrollbar">
+                    {allTags.map((tag) => {
+                      const isSelected = form.tags.some(
+                        (t) => t._id === tag._id,
+                      );
+                      return (
+                        <button
+                          key={tag._id}
+                          onClick={() => {
+                            if (isSelected) {
+                              setForm({
+                                ...form,
+                                tags: form.tags.filter(
+                                  (t) => t._id !== tag._id,
+                                ),
+                              });
+                            } else {
+                              setForm({ ...form, tags: [...form.tags, tag] });
+                            }
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border active:scale-95 ${
+                            isSelected
+                              ? "bg-white text-[#1A1A1A] border-white"
+                              : "border-white/15 text-white/50 hover:border-white/30"
+                          }`}
+                          style={
+                            !isSelected
+                              ? { background: "rgba(255,255,255,0.06)" }
+                              : {}
+                          }
+                        >
+                          #{tag.name}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Main Action Bar */}
+            {/* ── Main action bar ── */}
             <div className="flex items-center justify-between px-2 py-1">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5">
                 <button
                   onClick={() => toggleTab("add")}
-                  className={`p-3 rounded-2xl transition-all ${activeTab === "add" ? "bg-white text-black" : "text-white/60 hover:text-white"}`}
+                  className={`w-10 h-10 flex items-center justify-center rounded-[13px] transition-all active:scale-95 ${
+                    activeTab === "add"
+                      ? "bg-white text-[#1A1A1A]"
+                      : "text-white/50 hover:text-white"
+                  }`}
                 >
-                  <MdAdd size={24} />
+                  <MdAdd size={22} />
                 </button>
-                <button className="p-3 text-white/60 hover:text-white transition-all">
-                  <PiTextAUnderlineBold size={24} />
+                <button className="w-10 h-10 flex items-center justify-center rounded-[13px] text-white/50 hover:text-white transition-all active:scale-95">
+                  <PiTextAUnderlineBold size={20} />
                 </button>
                 <button
                   onClick={() => toggleTab("color")}
-                  className={`p-3 rounded-2xl transition-all ${activeTab === "color" ? "bg-white text-black" : "text-white/60 hover:text-white"}`}
+                  className={`w-10 h-10 flex items-center justify-center rounded-[13px] transition-all active:scale-95 ${
+                    activeTab === "color"
+                      ? "bg-white text-[#1A1A1A]"
+                      : "text-white/50 hover:text-white"
+                  }`}
                 >
-                  <VscSymbolColor size={24} />
+                  <VscSymbolColor size={20} />
                 </button>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => toggleTab("menu")}
-                  className={`p-3 rounded-2xl transition-all ${activeTab === "menu" ? "bg-white text-black" : "text-white/60 hover:text-white"}`}
+                  className={`w-10 h-10 flex items-center justify-center rounded-[13px] transition-all active:scale-95 ${
+                    activeTab === "menu"
+                      ? "bg-white text-[#1A1A1A]"
+                      : "text-white/50 hover:text-white"
+                  }`}
                 >
-                  <BsThreeDotsVertical size={20} />
+                  <BsThreeDotsVertical size={18} />
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={loading}
-                  className="px-6 py-3 bg-[#6EE7B7] text-[#1F2937] font-black rounded-2xl hover:bg-white transition-all shadow-lg active:scale-95 flex items-center justify-center disabled:opacity-50 min-w-[120px]"
+                  className="px-5 py-2.5 bg-white text-[#1A1A1A] font-bold text-[13px] rounded-[13px] active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center min-w-[100px]"
                 >
                   {loading ? (
-                    <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-[#1A1A1A]/20 border-t-[#1A1A1A] rounded-full animate-spin" />
                   ) : note ? (
                     "Update"
                   ) : (
-                    "Save Note"
+                    "Save note"
                   )}
                 </button>
               </div>

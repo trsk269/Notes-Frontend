@@ -37,8 +37,43 @@ export default function ProfilePage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onloadend = () => setProfilePic(reader.result as string);
+    reader.onloadend = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        // Maintain aspect ratio
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+
+        // Draw image on canvas
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // Compress as JPEG with 0.9 quality (High Quality, Low File Size)
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.9);
+        setProfilePic(compressedDataUrl);
+      };
+      img.src = reader.result as string;
+    };
     reader.readAsDataURL(file);
   };
 

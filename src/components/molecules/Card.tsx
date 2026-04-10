@@ -69,13 +69,61 @@ export default function Card({ note, onClick }: CardProps) {
   const cfg = TAG_CONFIG[tagKey] ?? TAG_CONFIG.default;
   const hasActions = note.isPinned || note.notifyAt;
 
+  // Helper to resolve background color from theme or tags
+  const getNoteStyles = () => {
+    if (note.isArchived) {
+      return {
+        background: "#F8F8F5",
+        borderColor: "#E8E5DC",
+      };
+    }
+
+    if (note.theme) {
+      // Handle hex themes like bg-[#HEX]
+      if (note.theme.startsWith("bg-[#") && note.theme.endsWith("]")) {
+        const hex = note.theme.slice(4, -1);
+        return {
+          background: hex,
+          borderColor: "rgba(0,0,0,0.05)", // Subtle border for custom colors
+        };
+      }
+
+      // Handle named themes from AddorUpdateNote
+      const themeMapping: Record<string, { bg: string; border: string }> = {
+        "bg-[#7DD3FC]": { bg: "#7DD3FC", border: "#38BDF8" }, // Sky
+        "bg-[#6EE7B7]": { bg: "#6EE7B7", border: "#34D399" }, // Emerald
+        "bg-red-200": { bg: "#FECACA", border: "#FCA5A5" },
+        "bg-pink-200": { bg: "#FBCFE8", border: "#F9A8D4" },
+        "bg-yellow-200": { bg: "#FEF08A", border: "#FDE047" },
+        "bg-orange-200": { bg: "#FED7AA", border: "#FDBA74" },
+        "bg-white": { bg: "#ffffff", border: "#EDECE6" },
+      };
+
+      const themeCfg = themeMapping[note.theme];
+      if (themeCfg) {
+        return {
+          background: themeCfg.bg,
+          borderColor: themeCfg.border,
+        };
+      }
+    }
+
+    // Fallback to tag-based color
+    return {
+      background: cfg.cardBg,
+      borderColor: cfg.cardBorder,
+    };
+  };
+
+  const { background, borderColor } = getNoteStyles();
+
   return (
     <button
       onClick={onClick}
       className="w-full text-left rounded-[18px] p-[14px] flex flex-col gap-[9px] border transition-transform active:scale-[0.98]"
       style={{
-        background: note.isArchived ? "#F8F8F5" : cfg.cardBg,
-        borderColor: note.isArchived ? "#E8E5DC" : cfg.cardBorder,
+        background,
+        borderColor,
         opacity: note.isArchived ? 0.72 : 1,
       }}
     >

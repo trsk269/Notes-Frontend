@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { IoArrowBack, IoArchiveOutline } from "react-icons/io5";
+import { IoChevronBack, IoArchiveOutline } from "react-icons/io5";
 import Results from "../../src/components/modules/Results";
 import { Note } from "../../src/types/note";
 
@@ -17,37 +17,46 @@ export default function ArchivePage() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-[#F9FAFB] flex flex-col items-center overflow-x-hidden">
-      <div className="w-full max-w-md flex flex-col gap-6 py-8 px-4 sm:px-6">
-        {/* Header */}
-        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="flex items-center gap-4">
+    <main className="h-screen w-full bg-[#FAFAF8] flex flex-col items-center overflow-hidden">
+      <div className="w-full max-w-md h-full flex flex-col">
+        {/* ── Dark hero header ── */}
+        <div className="bg-[#1A1A1A] px-5 pt-5 pb-7 flex-shrink-0">
+          {/* Top bar */}
+          <div className="flex items-center justify-between mb-5">
             <button
               onClick={handleBack}
-              className="p-3 bg-white text-gray-600 hover:text-yellow-400 hover:bg-yellow-50 rounded-2xl transition-all duration-300 shadow-sm border border-gray-100/50"
+              className="w-[34px] h-[34px] rounded-[11px] flex items-center justify-center active:scale-95 transition-transform"
+              style={{ background: "rgba(255,255,255,0.08)" }}
             >
-              <IoArrowBack size={22} />
+              <IoChevronBack size={16} color="rgba(255,255,255,0.6)" />
             </button>
-            <h1 className="text-2xl font-black text-[#1F2937]">Archive</h1>
+            <span className="text-[11px] font-bold text-white/35 uppercase tracking-widest">
+              Archive
+            </span>
+            <div className="w-[34px]" />
           </div>
 
-          <div className="p-6 bg-white border border-gray-100/80 rounded-[2rem] shadow-xl shadow-yellow-100/20 flex items-center gap-4 animate-in zoom-in-95 duration-700">
-            <div className="w-12 h-12 bg-yellow-50 text-yellow-500 rounded-2xl flex items-center justify-center shrink-0">
-              <IoArchiveOutline size={24} />
+          {/* Headline + descriptor */}
+          <div className="flex items-center gap-3">
+            <div
+              className="w-[42px] h-[42px] rounded-[14px] flex items-center justify-center flex-shrink-0"
+              style={{ background: "rgba(255,255,255,0.08)" }}
+            >
+              <IoArchiveOutline size={20} color="rgba(255,255,255,0.6)" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[#1F2937]">
+              <h1 className="text-[20px] font-extrabold text-white tracking-tight leading-tight">
                 Archived Notes
-              </h2>
-              <p className="text-sm text-gray-400 font-medium">
+              </h1>
+              <p className="text-[11px] text-white/35 mt-0.5">
                 Notes stored for later
               </p>
             </div>
           </div>
         </div>
 
-        {/* Results Section */}
-        <div className="mt-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* ── Scrollable results ── */}
+        <div className="flex-1 overflow-y-auto px-4 py-4">
           <Results
             onNoteClick={handleEditNote}
             refreshKey={0}

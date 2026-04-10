@@ -284,7 +284,7 @@ const AddorUpdateNote = ({
         )}
 
         {/* ── Header ── */}
-        <div className="w-full flex items-center justify-between px-5 pt-12 pb-4 md:pt-5 flex-shrink-0">
+        <div className="w-full flex items-center justify-between px-5 py-4 md:pt-5 flex-shrink-0">
           {/* Back */}
           <button
             onClick={handleClose}

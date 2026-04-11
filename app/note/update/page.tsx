@@ -1,4 +1,4 @@
-import AddorUpdateNote from "../../../../src/components/modules/AddorUpdateNote";
+import AddorUpdateNote from "../../../src/components/modules/AddorUpdateNote";
 
 const page = () => {
   return (

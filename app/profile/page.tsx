@@ -182,7 +182,9 @@ export default function ProfilePage() {
                 <p className="text-white text-[17px] font-extrabold tracking-tight leading-tight">
                   {name || username || "Account User"}
                 </p>
-                <p className="text-white/35 text-[11px] mt-0.5">{user?.email}</p>
+                <p className="text-white/35 text-[11px] mt-0.5">
+                  {user?.email}
+                </p>
               </div>
             </div>
           </div>

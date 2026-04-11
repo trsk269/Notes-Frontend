@@ -332,7 +332,7 @@ export default function ProfilePage() {
 
               {/* Desktop Bottom Actions */}
               <div
-                className={`${isDesktop ? "grid grid-cols-2 gap-8" : "flex flex-col gap-3"}`}
+                className={`${isDesktop ? "grid grid-cols-3 gap-8" : "flex flex-col gap-3"}`}
               >
                 {/* Archive Card */}
                 <button
@@ -359,11 +359,39 @@ export default function ProfilePage() {
                   />
                 </button>
 
+                {/* Logout Card */}
+                <button
+                  onClick={() => {
+                    logout();
+                    router.push("/auth");
+                  }}
+                  className="group bg-white border border-[#EDECE6] rounded-[24px] p-6 flex items-center justify-between hover:border-[#1A1A1A]/10 active:scale-[0.98] transition-all shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-[48px] h-[48px] bg-[#F5F5F0] rounded-[16px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#1A1A1A] group-hover:text-white transition-colors">
+                      <div className="w-1 h-4 bg-[#1A1A1A] group-hover:bg-white rounded-full" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[14px] font-bold text-[#1A1A1A] tracking-tight">
+                        Logout
+                      </p>
+                      <p className="text-[11px] text-[#B0ADA4] mt-0.5 font-medium">
+                        Securely sign out
+                      </p>
+                    </div>
+                  </div>
+                  <IoChevronBack
+                    size={16}
+                    color="#C8C5BC"
+                    className="rotate-180"
+                  />
+                </button>
+
                 {/* Delete Card */}
                 {!showDeleteConfirm ? (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="bg-white border border-[#FECACA]/60 rounded-[24px] p-6 flex items-center gap-4 hover:bg-[#FEF2F2]/30 active:scale-[0.98] transition-all shadow-[0_8px_30px_rgb(0,0,0,0.01)]"
+                    className="bg-white border border-[#FECACA]/60 rounded-[24px] p-6 flex items-center gap-4 hover:bg-[#FEF2F2]/30 active:scale-[0.98] transition-all shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
                   >
                     <div className="w-[48px] h-[48px] bg-[#FEF2F2] text-[#EF4444] rounded-[16px] flex items-center justify-center flex-shrink-0">
                       <IoTrashOutline size={20} />
@@ -384,8 +412,7 @@ export default function ProfilePage() {
                         Are you absolutely sure?
                       </p>
                       <p className="text-[11px] text-[#F87171] mt-1.5 leading-relaxed font-medium">
-                        This permanently removes your account and all associated
-                        notes. This cannot be undone.
+                        This permanently removes your account and notes.
                       </p>
                     </div>
                     <div className="flex gap-3 mt-1">

@@ -21,7 +21,8 @@ import { useAuthStore } from "../../store/auth.store";
 const Sidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useAuthStore();
+  const [showLogout, setShowLogout] = React.useState(false);
+  const { user, logout } = useAuthStore();
 
   const navItems = [
     { id: "/", label: "Home", icon: IoHomeOutline, activeIcon: IoHome },
@@ -51,14 +52,19 @@ const Sidebar = () => {
     },
   ];
 
+  const handleLogout = () => {
+    logout();
+    router.push("/auth");
+  };
+
   const isActive = (path: string) => pathname === path;
 
   return (
     <div className="hidden lg:flex flex-col w-[260px] h-screen bg-[#1A1A1A] text-white/50 border-r border-white/5 flex-shrink-0 sticky top-0">
       {/* Logo & Brand */}
       <div className="p-8 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-2 shadow-lg">
-          <Image src={logo} alt="Noted" width={32} height={32} />
+        <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-lg flex-shrink-0 overflow-hidden relative">
+          <Image src={logo} alt="Noted" fill className="object-cover" />
         </div>
         <div>
           <h1 className="text-white text-[18px] font-bold tracking-tight">
@@ -103,29 +109,80 @@ const Sidebar = () => {
         })}
       </div>
 
-      {/* Action Area */}
-      <div className="p-4 border-t border-white/5">
-        <button
-          onClick={() => router.push("/note/add")}
-          className="w-full bg-white text-[#1A1A1A] py-3.5 rounded-2xl flex items-center justify-center gap-2 font-bold text-[14px] shadow-sm active:scale-[0.98] transition-all"
+      {/* Bottom Section (Action + User) */}
+      <div className="flex flex-col p-4 border-t border-white/5 bg-[#1A1A1A]">
+        {/* Logout Tray (Revealed via max-h expansion) */}
+        <div
+          className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+            showLogout
+              ? "max-h-[120px] opacity-100 mb-4"
+              : "max-h-0 opacity-0 mb-0"
+          }`}
         >
-          <MdAdd size={20} />
-          New Note
-        </button>
-      </div>
-
-      {/* User Info */}
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white font-bold text-sm border border-white/10">
-          {user?.name?.charAt(0) || user?.username?.charAt(0) || "U"}
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => router.push("/profile")}
+              className="w-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white text-[13px] font-bold py-3 px-4 rounded-xl border border-white/5 transition-all active:scale-95 flex items-center gap-3 group"
+            >
+              <IoPersonOutline
+                size={16}
+                className="opacity-40 group-hover:opacity-100"
+              />
+              Settings
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-full bg-[#EF4444]/10 hover:bg-[#EF4444] text-[#EF4444] hover:text-white text-[13px] font-bold py-3 px-4 rounded-xl border border-[#EF4444]/20 transition-all active:scale-95 flex items-center gap-3 group"
+            >
+              <div className="w-1 h-4 bg-current opacity-20 group-hover:opacity-40 rounded-full" />
+              Logout Account
+            </button>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-white text-[13px] font-semibold truncate leading-none">
-            {user?.name || user?.username}
-          </p>
-          <p className="text-white/30 text-[11px] font-medium truncate mt-1">
-            {user?.email || "Account settings"}
-          </p>
+
+        {/* Action Area (Lifts when tray expands) */}
+        <div className="transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]">
+          <button
+            onClick={() => router.push("/note/add")}
+            className="w-full bg-white text-[#1A1A1A] py-3.5 rounded-2xl flex items-center justify-center gap-2 font-bold text-[14px] shadow-sm active:scale-[0.98] transition-all hover:scale-[1.01]"
+          >
+            <MdAdd size={20} />
+            New Note
+          </button>
+        </div>
+
+        {/* User Info (Anchor Point) */}
+        <div className="mt-4">
+          <div
+            onClick={() => setShowLogout(!showLogout)}
+            className={`flex items-center gap-3 cursor-pointer p-3 rounded-2xl transition-all duration-300 ${
+              showLogout ? "bg-white/10" : "hover:bg-white/5"
+            }`}
+          >
+            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden">
+              {user?.profilePic ? (
+                <img
+                  src={user.profilePic}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-white font-bold text-sm">
+                  {(user?.name || user?.username || "U")
+                    .charAt(0)
+                    .toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-[13px] font-semibold truncate leading-none">
+                {user?.name || user?.username || "Account User"}
+              </p>
+              <p className="text-white/30 text-[11px] font-medium truncate mt-1">
+                {user?.email || "Workspace Active"}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Card from "../molecules/Card";
 import { getNotes } from "../../services/notes.service";
 import { Note } from "../../types/note";
+import { IoPin, IoNotifications, IoJournal } from "react-icons/io5";
 
 interface ResultsProps {
   onNoteClick: (note: Note) => void;
@@ -10,7 +11,36 @@ interface ResultsProps {
   search?: string;
   filter?: string;
   tagId?: string;
+  isDesktop?: boolean;
 }
+
+const Column = ({ title, notes, onNoteClick, icon: Icon }: any) => (
+  <div className="flex-1 flex flex-col gap-4 min-w-0">
+    <div className="flex items-center gap-2 px-1 mb-2">
+      <div className="w-8 h-8 rounded-lg bg-[#E8E8E2] border border-[#DEDDDA] flex items-center justify-center text-[#1A1A1A]">
+        <Icon size={16} />
+      </div>
+      <h3 className="text-[15px] font-bold text-[#1A1A1A] tracking-tight">
+        {title}
+      </h3>
+      <span className="ml-auto text-[11px] font-bold text-[#B0ADA4] bg-[#F5F5F0] px-2 py-0.5 rounded-full uppercase tracking-wider">
+        {notes.length}
+      </span>
+    </div>
+    <div className="flex flex-col gap-3">
+      {notes.map((note: Note) => (
+        <Card key={note._id} note={note} onClick={() => onNoteClick(note)} />
+      ))}
+      {notes.length === 0 && (
+        <div className="py-10 border-2 border-dashed border-[#EDECE6] rounded-[24px] flex flex-col items-center justify-center text-center px-4 bg-[#F9F9F7]/50">
+          <p className="text-[12px] font-bold text-[#C0BDB4] tracking-tight">
+            Empty
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 export default function Results({
   onNoteClick,
@@ -18,6 +48,7 @@ export default function Results({
   search = "",
   filter = "",
   tagId = "",
+  isDesktop = false,
 }: ResultsProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [page, setPage] = useState(1);
@@ -72,12 +103,11 @@ export default function Results({
   /* ── Skeleton ── */
   if (loading && notes.length === 0) {
     return (
-      <div className="flex flex-col gap-3 pt-3">
+      <div className={`flex gap-6 pt-3 ${isDesktop ? "flex-row" : "flex-col"}`}>
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="w-full bg-white border border-[#EDECE6] rounded-[20px] animate-pulse"
-            style={{ height: i === 1 ? 110 : 88 }}
+            className={`bg-white border border-[#EDECE6] rounded-[24px] animate-pulse ${isDesktop ? "flex-1 h-64" : "w-full h-[110px]"}`}
           />
         ))}
       </div>
@@ -140,6 +170,37 @@ export default function Results({
     );
   }
 
+  /* ── Desktop Grid Rendering ── */
+  if (isDesktop) {
+    const pinned = notes.filter((n) => n.isPinned);
+    const reminders = notes.filter((n) => !n.isPinned && n.notifyAt);
+    const others = notes.filter((n) => !n.isPinned && !n.notifyAt);
+
+    return (
+      <div className="flex gap-8 items-start">
+        <Column
+          title="Pinned"
+          notes={pinned}
+          onNoteClick={onNoteClick}
+          icon={IoPin}
+        />
+        <Column
+          title="Reminders"
+          notes={reminders}
+          onNoteClick={onNoteClick}
+          icon={IoNotifications}
+        />
+        <Column
+          title="Notes"
+          notes={others}
+          onNoteClick={onNoteClick}
+          icon={IoJournal}
+        />
+      </div>
+    );
+  }
+
+  /* ── Mobile/List Rendering ── */
   return (
     <>
       <div className="flex flex-col gap-3 pt-3">
